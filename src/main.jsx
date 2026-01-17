@@ -1,10 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import MaraV6 from './MaraV6'
+import MaraV15 from './MaraV15'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <MaraV6 />
+    <MaraV15 />
   </React.StrictMode>,
 )
