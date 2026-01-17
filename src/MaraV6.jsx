@@ -1,10 +1,110 @@
 import { useState, useRef, useEffect } from 'react';
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// MARA V14 - Mara always present + Browse All accessible everywhere
+// MARA V15 - V14 + AI Generate with FAL LoRA models
+// "The only AI that shows you what you can actually build."
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const CLOUDINARY_BASE = 'https://res.cloudinary.com/dtlodxxio/image/upload';
+
+// ⚠️ FAL API KEY
+const FAL_API_KEY = "3e417ede-cd4b-4b81-8116-2684760b5a70:2e1ad6ff3d9d2a171a31d6ebc2612073";
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LORA MODELS FOR AI GENERATE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const LORA_MODELS = {
+  lake: {
+    name: 'Lake',
+    trigger: 'mrlake',
+    url: 'https://v3.fal.media/files/b/0a87e361/Tc4UZShpbQ9FmneXxjoc4_pytorch_lora_weights.safetensors',
+    scale: 1.0,
+    hasBacklight: true,
+    description: 'Concentric ripples radiating outward',
+    patternDescription: 'carved white Corian horizontal wave ridges'
+  },
+  flame: {
+    name: 'Flame',
+    trigger: 'mrflame',
+    url: 'https://v3.fal.media/files/b/0a883628/Iyraeb6tJunafTQ8q_i5N_pytorch_lora_weights.safetensors',
+    scale: 1.3,
+    hasBacklight: true,
+    description: 'Flowing vertical waves that interweave',
+    patternDescription: 'carved white Corian flowing vertical waves interweaving'
+  },
+  fins: {
+    name: 'Fins',
+    trigger: 'fnptrn',
+    url: 'https://v3.fal.media/files/b/0a87f1e6/mBUGXAbUMaM1wWFhzhI9g_pytorch_lora_weights.safetensors',
+    scale: 1.0,
+    hasBacklight: false,
+    description: 'Diamond chevron fins with parallel ridges',
+    patternDescription: 'carved white Corian diamond chevron fins'
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SECTORS & APPLICATIONS FOR AI GENERATE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const SECTORS = {
+  healthcare: {
+    name: 'Healthcare',
+    applications: ['Lobby', 'Elevator Lobby', 'Patient Room', 'Meditation Room']
+  },
+  corporate: {
+    name: 'Corporate',
+    applications: ['Reception', 'Elevator Lobby', 'Boardroom']
+  },
+  hospitality: {
+    name: 'Hospitality',
+    applications: ['Hotel Lobby', 'Restaurant', 'Bar', 'Spa']
+  },
+  residential: {
+    name: 'Residential',
+    applications: ['Living Room', 'Bathroom', 'Fireplace', 'Shower']
+  }
+};
+
+const BACKLIGHT_COLORS = {
+  warm: { name: 'Warm Golden', phrase: 'warm golden LED backlighting' },
+  cool: { name: 'Cool White', phrase: 'cool white LED backlighting' },
+  pink: { name: 'Pink', phrase: 'pink LED backlighting' },
+  blue: { name: 'Blue', phrase: 'cool blue LED backlighting' },
+  cyan: { name: 'Cyan', phrase: 'cyan LED backlighting' },
+  purple: { name: 'Purple', phrase: 'purple LED backlighting' }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PROMPT TEMPLATES FOR AI GENERATE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const PROMPT_TEMPLATES = {
+  healthcare: {
+    'Lobby': 'Grand modern hospital atrium lobby with double height glass curtain walls, sweeping curved reception desk, monumental floor to ceiling backlit feature wall with {pattern}, {backlight}, polished concrete floors, indoor trees, natural daylight flooding in, hyperrealistic healthcare architecture photography',
+    'Elevator Lobby': 'Hospital elevator lobby with curved thermoformed walls wrapping around two elevator doors with bronze frames, {pattern}, {backlight}, LED cove light strip following curved ceiling line, polished stone floor, immersive sculptural healthcare interior, architectural photography',
+    'Patient Room': 'Upscale hospital patient suite with comfortable bed, backlit headboard wall with {pattern}, {backlight}, boutique hotel aesthetic, wood grain accents, armchair for visitors, large window with garden view, natural daylight, healing hospitality design',
+    'Meditation Room': 'Hospital meditation and prayer room, floor to ceiling backlit feature wall with {pattern}, {backlight}, wooden bench seating, peaceful spiritual atmosphere, healthcare wellness design'
+  },
+  corporate: {
+    'Reception': 'Modern corporate headquarters lobby with floor to ceiling feature wall featuring {pattern}, {backlight}, grazing light revealing sculptural depth, polished concrete floor, reception desk, architectural photography',
+    'Elevator Lobby': 'Corporate elevator lobby with stainless steel elevator doors, floor to ceiling backlit translucent wall with {pattern} glowing from behind, {backlight}, commercial office interior photography',
+    'Boardroom': 'Executive boardroom with dramatic feature wall of {pattern}, {backlight}, polished conference table, leather chairs, sophisticated corporate interior'
+  },
+  hospitality: {
+    'Hotel Lobby': 'Luxury hotel lobby with soaring ceilings, monumental backlit feature wall with {pattern}, {backlight}, marble floors, designer furniture, dramatic arrival experience',
+    'Restaurant': 'Upscale restaurant interior with feature wall of {pattern}, {backlight}, intimate dining atmosphere, fine dining setting',
+    'Bar': 'High-end bar with dramatic backlit wall featuring {pattern}, {backlight}, polished bar top, moody sophisticated atmosphere',
+    'Spa': 'Luxury spa reception with calming feature wall of {pattern}, {backlight}, tranquil wellness environment, natural materials'
+  },
+  residential: {
+    'Living Room': 'Contemporary living room with floor to ceiling backlit feature wall featuring {pattern} surrounding linear gas fireplace, {backlight}, sectional sofa, hardwood floors, residential interior design',
+    'Bathroom': 'Luxury residential primary bathroom with seamless {pattern} walls, {backlight}, frameless glass enclosure, freestanding soaking tub, natural daylight from skylight, marble floor, spa-like atmosphere',
+    'Fireplace': 'Modern fireplace surround with dramatic {pattern}, {backlight}, contemporary living space, warm intimate atmosphere',
+    'Shower': 'Seamless luxury shower with {pattern} walls, {backlight}, frameless glass, rainfall showerhead, spa-like residential bathroom'
+  }
+};
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CORIAN COLOR DEFINITIONS
@@ -22,7 +122,7 @@ const CORIAN_COLORS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// IMAGE CATALOG
+// IMAGE CATALOG (unchanged from V14)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const IMAGE_CATALOG = [
@@ -492,7 +592,6 @@ const IMAGE_CATALOG = [
 const getFamilyImages = (selectedImage) => {
   if (!selectedImage) return [];
   
-  // Tier 1: Same pattern family, different colors
   if (selectedImage.patternFamily) {
     const colorVariants = IMAGE_CATALOG.filter(
       img => img.patternFamily === selectedImage.patternFamily && img.id !== selectedImage.id
@@ -500,13 +599,11 @@ const getFamilyImages = (selectedImage) => {
     if (colorVariants.length >= 3) return colorVariants.slice(0, 4);
   }
   
-  // Tier 2: Same pattern, different applications
   const patternVariants = IMAGE_CATALOG.filter(
     img => img.pattern === selectedImage.pattern && img.id !== selectedImage.id
   );
   if (patternVariants.length >= 3) return patternVariants.slice(0, 4);
   
-  // Tier 3: Similar attributes
   const similar = IMAGE_CATALOG.map(img => {
     if (img.id === selectedImage.id) return { ...img, score: -1 };
     let score = 0;
@@ -530,14 +627,13 @@ const getFamilyImages = (selectedImage) => {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// SEARCH - Strict backlight filtering
+// SEARCH
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const searchImages = (query) => {
   if (!query) return [];
   const lower = query.toLowerCase();
   
-  // STRICT BACKLIGHT
   if (lower.includes('backlight') || lower.includes('backlit') || lower.includes('glow') || lower.includes('illuminat')) {
     return IMAGE_CATALOG.filter(img => img.isBacklit === true).slice(0, 2);
   }
@@ -602,30 +698,70 @@ const cleanResponse = (text) => text.replace(/\[Image:\s*[^\]]+\]/g, '').trim();
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export default function MaraV14() {
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      text: "Hey! I'm Mara from MR Walls. I help architects explore carved Corian surfaces.\n\nTap an image to explore, or ask me anything:",
-      images: [
-        IMAGE_CATALOG.find(i => i.id === 'buddha-1'),
-        IMAGE_CATALOG.find(i => i.id === 'greatwave-1')
-      ]
-    }
-  ]);
+export default function MaraV15() {
+  // Chat state
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState([]);
+  
+  // Typing intro state
+  const [introText, setIntroText] = useState('');
+  const [introComplete, setIntroComplete] = useState(false);
+  const fullIntro = "Hey! I'm Mara from MR Walls. I help architects explore carved Corian surfaces.\n\nTap an image to explore, ask me anything, or ";
+  const generateLinkText = "I can generate a custom visualization";
+  const afterLink = " for your space.";
+  
+  // Image viewing state
   const [selectedImage, setSelectedImage] = useState(null);
   const [familyImages, setFamilyImages] = useState([]);
   const [specsImage, setSpecsImage] = useState(null);
   const [showGallery, setShowGallery] = useState(false);
-  const [history, setHistory] = useState([]);
+  
+  // AI Generate state
+  const [generateFlow, setGenerateFlow] = useState(null); // null, 'pattern', 'sector', 'application', 'backlight', 'generating'
+  const [genPattern, setGenPattern] = useState(null);
+  const [genSector, setGenSector] = useState(null);
+  const [genApplication, setGenApplication] = useState(null);
+  const [genBacklight, setGenBacklight] = useState(null);
+  const [generatedImage, setGeneratedImage] = useState(null);
+  const [showGeneratedModal, setShowGeneratedModal] = useState(false);
+  
   const messagesEndRef = useRef(null);
   const modalInputRef = useRef(null);
 
+  // Typing effect for intro
+  useEffect(() => {
+    if (introComplete) return;
+    
+    const fullText = fullIntro + generateLinkText + afterLink;
+    let i = 0;
+    const timer = setInterval(() => {
+      if (i < fullText.length) {
+        setIntroText(fullText.slice(0, i + 1));
+        i++;
+      } else {
+        clearInterval(timer);
+        setIntroComplete(true);
+        // Add initial images after intro completes
+        setMessages([{
+          role: 'assistant',
+          text: '',
+          images: [
+            IMAGE_CATALOG.find(i => i.id === 'buddha-1'),
+            IMAGE_CATALOG.find(i => i.id === 'greatwave-1')
+          ],
+          isIntroImages: true
+        }]);
+      }
+    }, 50);
+    
+    return () => clearInterval(timer);
+  }, [introComplete]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, generateFlow]);
 
   const getGalleryPatterns = () => {
     const patterns = {};
@@ -656,6 +792,182 @@ export default function MaraV14() {
   const closeSpecs = () => {
     setSpecsImage(null);
   };
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // AI GENERATE FUNCTIONS
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  const startGenerateFlow = () => {
+    setGenerateFlow('pattern');
+    setGenPattern(null);
+    setGenSector(null);
+    setGenApplication(null);
+    setGenBacklight(null);
+    setMessages(m => [...m, {
+      role: 'assistant',
+      text: "Let's create something. Choose a pattern:",
+      isGenerateStep: true
+    }]);
+  };
+
+  const selectPattern = (patternKey) => {
+    setGenPattern(patternKey);
+    setGenerateFlow('sector');
+    setMessages(m => [...m, 
+      { role: 'user', text: LORA_MODELS[patternKey].name },
+      { role: 'assistant', text: `${LORA_MODELS[patternKey].name} — ${LORA_MODELS[patternKey].description}.\n\nWhat sector?`, isGenerateStep: true }
+    ]);
+  };
+
+  const selectSector = (sectorKey) => {
+    setGenSector(sectorKey);
+    setGenerateFlow('application');
+    setMessages(m => [...m,
+      { role: 'user', text: SECTORS[sectorKey].name },
+      { role: 'assistant', text: `Got it, ${SECTORS[sectorKey].name}. What application?`, isGenerateStep: true }
+    ]);
+  };
+
+  const selectApplication = (app) => {
+    setGenApplication(app);
+    const model = LORA_MODELS[genPattern];
+    
+    if (model.hasBacklight) {
+      setGenerateFlow('backlight');
+      setMessages(m => [...m,
+        { role: 'user', text: app },
+        { role: 'assistant', text: 'What backlight color?', isGenerateStep: true }
+      ]);
+    } else {
+      // Fins doesn't have backlight, go straight to generate
+      setMessages(m => [...m, { role: 'user', text: app }]);
+      generateImage(genPattern, genSector, app, null);
+    }
+  };
+
+  const selectBacklight = (colorKey) => {
+    setGenBacklight(colorKey);
+    setMessages(m => [...m, { role: 'user', text: BACKLIGHT_COLORS[colorKey].name }]);
+    generateImage(genPattern, genSector, genApplication, colorKey);
+  };
+
+  const buildPrompt = (patternKey, sectorKey, application, backlightKey) => {
+    const model = LORA_MODELS[patternKey];
+    const template = PROMPT_TEMPLATES[sectorKey]?.[application];
+    const backlight = backlightKey ? BACKLIGHT_COLORS[backlightKey].phrase : 'soft ambient lighting';
+    
+    if (template) {
+      let prompt = template.replace('{pattern}', model.patternDescription);
+      prompt = prompt.replace('{backlight}', backlight);
+      return `${prompt}, ${model.trigger}`;
+    }
+    
+    return `Architectural interior with floor to ceiling feature wall featuring ${model.patternDescription}, ${backlight}, professional architecture photography, ${model.trigger}`;
+  };
+
+  const generateImage = async (patternKey, sectorKey, application, backlightKey) => {
+    setGenerateFlow('generating');
+    
+    const model = LORA_MODELS[patternKey];
+    const sectorName = SECTORS[sectorKey].name;
+    
+    setMessages(m => [...m, {
+      role: 'assistant',
+      text: `Creating your ${model.name} pattern in a ${sectorName.toLowerCase()} ${application.toLowerCase()}... one moment.`,
+      isGenerating: true
+    }]);
+
+    const prompt = buildPrompt(patternKey, sectorKey, application, backlightKey);
+    console.log('Generating with prompt:', prompt);
+
+    try {
+      const response = await fetch('https://queue.fal.run/fal-ai/flux-2/lora', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Key ${FAL_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          prompt: prompt,
+          loras: [{ path: model.url, scale: model.scale }],
+          image_size: 'landscape_16_9',
+          num_images: 1,
+          output_format: 'jpeg',
+          guidance_scale: 2.5,
+          num_inference_steps: 28,
+          enable_safety_checker: false
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.images && result.images.length > 0) {
+        const genImg = {
+          url: result.images[0].url,
+          pattern: model.name,
+          sector: sectorName,
+          application: application,
+          backlight: backlightKey ? BACKLIGHT_COLORS[backlightKey].name : null
+        };
+        setGeneratedImage(genImg);
+        setShowGeneratedModal(true);
+        
+        // Update last message to show success
+        setMessages(m => {
+          const updated = [...m];
+          updated[updated.length - 1] = {
+            role: 'assistant',
+            text: `Done! Here's your ${model.name} in a ${sectorName.toLowerCase()} ${application.toLowerCase()}.`,
+            isGenerating: false
+          };
+          return updated;
+        });
+        
+        setGenerateFlow('complete');
+      } else {
+        throw new Error('No image returned');
+      }
+    } catch (error) {
+      console.error('Generation error:', error);
+      setMessages(m => {
+        const updated = [...m];
+        updated[updated.length - 1] = {
+          role: 'assistant',
+          text: `Hmm, something went wrong. Want to try again?`,
+          isGenerating: false
+        };
+        return updated;
+      });
+      setGenerateFlow('pattern');
+    }
+  };
+
+  const generateAnother = () => {
+    setShowGeneratedModal(false);
+    setGeneratedImage(null);
+    setGenerateFlow('pattern');
+    setGenPattern(null);
+    setGenSector(null);
+    setGenApplication(null);
+    setGenBacklight(null);
+    setMessages(m => [...m, {
+      role: 'assistant',
+      text: "Let's create another. Choose a pattern:",
+      isGenerateStep: true
+    }]);
+  };
+
+  const closeGeneratedModal = () => {
+    setShowGeneratedModal(false);
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // CLAUDE API
+  // ═══════════════════════════════════════════════════════════════════════════════
 
   const callClaude = async (userMsg, hist) => {
     const apiMessages = [...hist, { role: 'user', content: userMsg }];
@@ -689,6 +1001,15 @@ export default function MaraV14() {
     
     const userMsg = text.trim();
     const lower = userMsg.toLowerCase();
+    
+    // Check for generate intent
+    if (lower.includes('generate') || lower.includes('create') || lower.includes('visualiz')) {
+      setInput('');
+      setMessages(m => [...m, { role: 'user', text: userMsg }]);
+      startGenerateFlow();
+      if (fromModal) closeModal();
+      return;
+    }
     
     // Browse intent
     if (lower.includes('everything') || lower.includes('all image') || lower.includes('browse') || lower.includes('scroll') || lower.includes('gallery') || lower.includes('show me all') || lower.includes('see all')) {
@@ -736,14 +1057,132 @@ export default function MaraV14() {
     }]);
     
     setLoading(false);
-    
-    // If sent from modal, close it so user sees the new response
     if (fromModal) closeModal();
   };
 
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════════
   // RENDER
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════════════
+  
+  // Render intro text with clickable generate link
+  const renderIntroText = () => {
+    if (!introComplete) {
+      // Still typing
+      return <span>{introText}</span>;
+    }
+    
+    // Complete - render with clickable link
+    return (
+      <>
+        {fullIntro}
+        <button 
+          onClick={startGenerateFlow}
+          className="text-amber-400 hover:text-amber-300 underline underline-offset-2"
+        >
+          {generateLinkText}
+        </button>
+        {afterLink}
+      </>
+    );
+  };
+
+  // Render generate flow buttons
+  const renderGenerateButtons = () => {
+    if (generateFlow === 'pattern') {
+      return (
+        <div className="flex flex-wrap gap-2 mt-3">
+          {Object.entries(LORA_MODELS).map(([key, model]) => (
+            <button
+              key={key}
+              onClick={() => selectPattern(key)}
+              className="px-4 py-2 bg-stone-800 hover:bg-stone-700 border border-stone-600 rounded-lg text-sm transition-colors"
+            >
+              {model.name}
+            </button>
+          ))}
+        </div>
+      );
+    }
+    
+    if (generateFlow === 'sector') {
+      return (
+        <div className="flex flex-wrap gap-2 mt-3">
+          {Object.entries(SECTORS).map(([key, sector]) => (
+            <button
+              key={key}
+              onClick={() => selectSector(key)}
+              className="px-4 py-2 bg-stone-800 hover:bg-stone-700 border border-stone-600 rounded-lg text-sm transition-colors"
+            >
+              {sector.name}
+            </button>
+          ))}
+        </div>
+      );
+    }
+    
+    if (generateFlow === 'application' && genSector) {
+      return (
+        <div className="flex flex-wrap gap-2 mt-3">
+          {SECTORS[genSector].applications.map((app) => (
+            <button
+              key={app}
+              onClick={() => selectApplication(app)}
+              className="px-4 py-2 bg-stone-800 hover:bg-stone-700 border border-stone-600 rounded-lg text-sm transition-colors"
+            >
+              {app}
+            </button>
+          ))}
+        </div>
+      );
+    }
+    
+    if (generateFlow === 'backlight') {
+      return (
+        <div className="flex flex-wrap gap-2 mt-3">
+          {Object.entries(BACKLIGHT_COLORS).map(([key, color]) => (
+            <button
+              key={key}
+              onClick={() => selectBacklight(key)}
+              className="px-4 py-2 bg-stone-800 hover:bg-stone-700 border border-stone-600 rounded-lg text-sm transition-colors"
+            >
+              {color.name}
+            </button>
+          ))}
+        </div>
+      );
+    }
+    
+    if (generateFlow === 'generating') {
+      return (
+        <div className="flex items-center gap-2 mt-3">
+          <div className="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm text-stone-400">Generating...</span>
+        </div>
+      );
+    }
+    
+    if (generateFlow === 'complete') {
+      return (
+        <div className="flex gap-2 mt-3">
+          <button
+            onClick={() => setShowGeneratedModal(true)}
+            className="px-4 py-2 bg-stone-800 hover:bg-stone-700 border border-stone-600 rounded-lg text-sm transition-colors"
+          >
+            View Image
+          </button>
+          <button
+            onClick={generateAnother}
+            className="px-4 py-2 bg-amber-600 hover:bg-amber-500 rounded-lg text-sm transition-colors"
+          >
+            Generate Another
+          </button>
+        </div>
+      );
+    }
+    
+    return null;
+  };
+
   return (
     <div className="h-screen bg-stone-950 text-stone-100 flex flex-col" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       
@@ -771,19 +1210,41 @@ export default function MaraV14() {
 
       {/* Messages */}
       <main className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Intro Message with Typing Effect */}
+        <div className="flex justify-start">
+          <div className="max-w-[85%]">
+            <div className="bg-stone-900 border border-stone-800 rounded-2xl px-4 py-3">
+              <p className="text-sm whitespace-pre-wrap">{renderIntroText()}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Messages */}
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className="max-w-[85%]">
-              <div className={`rounded-2xl px-4 py-3 ${
-                msg.role === 'user' 
-                  ? 'bg-stone-700 text-stone-100' 
-                  : 'bg-stone-900 border border-stone-800'
-              }`}>
-                <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-              </div>
+              {msg.text && (
+                <div className={`rounded-2xl px-4 py-3 ${
+                  msg.role === 'user' 
+                    ? 'bg-stone-700 text-stone-100' 
+                    : 'bg-stone-900 border border-stone-800'
+                }`}>
+                  <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
+                  
+                  {/* Show generate buttons after generate step messages */}
+                  {msg.isGenerateStep && i === messages.length - 1 && renderGenerateButtons()}
+                  
+                  {/* Show generating spinner */}
+                  {msg.isGenerating && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                </div>
+              )}
               
               {msg.images && msg.images.length > 0 && (
-                <div className="mt-3 grid grid-cols-2 gap-3">
+                <div className={`grid grid-cols-2 gap-3 ${msg.text ? 'mt-3' : ''}`}>
                   {msg.images.map((img, j) => (
                     <button
                       key={j}
@@ -803,6 +1264,15 @@ export default function MaraV14() {
             </div>
           </div>
         ))}
+        
+        {/* Show generate buttons at end if in flow but no message has them */}
+        {generateFlow && !messages.some(m => m.isGenerateStep && messages.indexOf(m) === messages.length - 1) && generateFlow !== 'generating' && generateFlow !== 'complete' && (
+          <div className="flex justify-start">
+            <div className="max-w-[85%]">
+              {renderGenerateButtons()}
+            </div>
+          </div>
+        )}
         
         {loading && (
           <div className="flex justify-start">
@@ -826,12 +1296,12 @@ export default function MaraV14() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && send(input)}
             placeholder="Ask about patterns, colors, backlighting..."
-            disabled={loading}
+            disabled={loading || generateFlow === 'generating'}
             className="flex-1 px-4 py-3 bg-stone-900 border border-stone-700 rounded-xl text-sm focus:outline-none focus:border-stone-500 disabled:opacity-50"
           />
           <button
             onClick={() => send(input)}
-            disabled={loading || !input.trim()}
+            disabled={loading || !input.trim() || generateFlow === 'generating'}
             className="px-5 py-3 bg-stone-100 text-stone-900 rounded-xl font-medium text-sm hover:bg-white disabled:opacity-50 transition-colors"
           >
             Send
@@ -839,11 +1309,66 @@ export default function MaraV14() {
         </div>
       </footer>
 
-      {/* FAMILY MODAL - with Mara input */}
+      {/* GENERATED IMAGE MODAL */}
+      {showGeneratedModal && generatedImage && (
+        <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
+          <div className="max-w-4xl w-full">
+            <div className="relative aspect-video rounded-xl overflow-hidden mb-4">
+              <img 
+                src={generatedImage.url} 
+                alt={`${generatedImage.pattern} in ${generatedImage.application}`}
+                className="w-full h-full object-cover"
+              />
+              {/* AI Generated Badge */}
+              <div className="absolute top-4 left-4 bg-amber-500 text-black text-xs font-medium px-3 py-1 rounded-full">
+                AI Generated
+              </div>
+              {/* Close button */}
+              <button 
+                onClick={closeGeneratedModal}
+                className="absolute top-4 right-4 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white"
+              >
+                ✕
+              </button>
+            </div>
+            
+            {/* Info */}
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-medium text-white mb-1">
+                {generatedImage.pattern} • {generatedImage.sector} {generatedImage.application}
+              </h3>
+              {generatedImage.backlight && (
+                <p className="text-sm text-stone-400">{generatedImage.backlight} backlight</p>
+              )}
+              <p className="text-xs text-stone-500 mt-2">Every image is buildable — CNC files, shop drawings, pricing available.</p>
+            </div>
+            
+            {/* Actions */}
+            <div className="flex gap-3 justify-center">
+              <a
+                href={generatedImage.url}
+                download={`MRWalls-${generatedImage.pattern}-${Date.now()}.jpg`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-3 bg-stone-800 hover:bg-stone-700 border border-stone-600 rounded-xl text-sm font-medium transition-colors"
+              >
+                Download
+              </a>
+              <button
+                onClick={generateAnother}
+                className="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-black rounded-xl text-sm font-medium transition-colors"
+              >
+                Generate Another
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FAMILY MODAL */}
       {selectedImage && !specsImage && (
         <div className="fixed inset-0 bg-black/90 z-50 overflow-y-auto">
           <div className="max-w-4xl mx-auto p-4">
-            {/* Close + Browse buttons */}
             <div className="flex justify-between items-center mb-4">
               <button
                 onClick={() => setShowGallery(true)}
@@ -862,7 +1387,6 @@ export default function MaraV14() {
               </button>
             </div>
 
-            {/* Selected Image */}
             <div className="aspect-video relative rounded-xl overflow-hidden mb-4">
               <img src={selectedImage.image} alt={selectedImage.title} className="w-full h-full object-cover" />
               <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg px-4 py-2">
@@ -871,7 +1395,6 @@ export default function MaraV14() {
               </div>
             </div>
 
-            {/* Mara Panel */}
             <div className="bg-stone-900 border border-stone-800 rounded-xl p-4 mb-4">
               <div className="flex items-start gap-3 mb-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center text-xs font-medium shrink-0">M</div>
@@ -881,7 +1404,6 @@ export default function MaraV14() {
                 </div>
               </div>
               
-              {/* Mara Input in Modal */}
               <div className="flex gap-2">
                 <input
                   ref={modalInputRef}
@@ -908,7 +1430,6 @@ export default function MaraV14() {
               </div>
             </div>
 
-            {/* Family Grid */}
             <div className="grid grid-cols-4 gap-3 mb-4">
               {familyImages.map((img, i) => (
                 <button
@@ -931,7 +1452,6 @@ export default function MaraV14() {
               ))}
             </div>
 
-            {/* View Specs Button */}
             <button
               onClick={() => handleFamilyClick(selectedImage)}
               className="w-full py-3 bg-stone-800 hover:bg-stone-700 rounded-xl text-sm font-medium"
