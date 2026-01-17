@@ -1,0 +1,1030 @@
+import { useState, useRef, useEffect } from 'react';
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MARA V14 - Mara always present + Browse All accessible everywhere
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const CLOUDINARY_BASE = 'https://res.cloudinary.com/dtlodxxio/image/upload';
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CORIAN COLOR DEFINITIONS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const CORIAN_COLORS = {
+  "Glacier White": { hex: "#f5f5f5" },
+  "Deep Nocturne": { hex: "#1a1a1a" },
+  "Carbon Concrete": { hex: "#3a3a3a" },
+  "Dove": { hex: "#9a9a9a" },
+  "Neutral Concrete": { hex: "#b8b5b0" },
+  "Artista Mist": { hex: "#c5c5c5" },
+  "Laguna": { hex: "#1e3a5f" },
+  "Verdant": { hex: "#2d4a4a" }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// IMAGE CATALOG
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const IMAGE_CATALOG = [
+  // INDUSTRIAL BRICK - 6 Colors
+  {
+    id: 'industrial-brick-carbon',
+    pattern: 'Industrial Brick',
+    patternFamily: 'Industrial Brick',
+    title: 'Industrial Brick',
+    sector: 'Aviation',
+    corianColor: 'Carbon Concrete',
+    mood: ['dramatic', 'industrial', 'modern'],
+    isBacklit: false,
+    keywords: ['industrial', 'brick', 'carbon', 'concrete', 'dark', 'grey', 'gray', 'aviation', 'airport'],
+    image: `${CLOUDINARY_BASE}/Carbon_Concrete-industrial_vxloqv.png`,
+    specs: { material: 'DuPont Corian®', color: 'Carbon Concrete', maxPanel: '144" × 60"', leadTime: '6-10 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
+    description: 'Industrial Brick in Carbon Concrete — dark shale grey. The texture pops against the dark background.'
+  },
+  {
+    id: 'industrial-brick-dove',
+    pattern: 'Industrial Brick',
+    patternFamily: 'Industrial Brick',
+    title: 'Industrial Brick',
+    sector: 'Aviation',
+    corianColor: 'Dove',
+    mood: ['warm', 'neutral', 'calm'],
+    isBacklit: false,
+    keywords: ['industrial', 'brick', 'dove', 'grey', 'gray', 'warm', 'soft', 'aviation'],
+    image: `${CLOUDINARY_BASE}/Dove_industrial_w6jvlx.png`,
+    specs: { material: 'DuPont Corian®', color: 'Dove', maxPanel: '144" × 60"', leadTime: '6-10 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
+    description: 'Industrial Brick in Dove — soft warm grey. Versatile, inviting, works anywhere.'
+  },
+  {
+    id: 'industrial-brick-neutral',
+    pattern: 'Industrial Brick',
+    patternFamily: 'Industrial Brick',
+    title: 'Industrial Brick',
+    sector: 'Aviation',
+    corianColor: 'Neutral Concrete',
+    mood: ['neutral', 'honest', 'modern'],
+    isBacklit: false,
+    keywords: ['industrial', 'brick', 'neutral', 'concrete', 'light', 'grey', 'gray', 'aviation'],
+    image: `${CLOUDINARY_BASE}/Neautral_concrete-industrial_v7gbel.png`,
+    specs: { material: 'DuPont Corian®', color: 'Neutral Concrete', maxPanel: '144" × 60"', leadTime: '6-10 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
+    description: 'Industrial Brick in Neutral Concrete — reads as honest material. Architects love it.'
+  },
+  {
+    id: 'industrial-brick-artista',
+    pattern: 'Industrial Brick',
+    patternFamily: 'Industrial Brick',
+    title: 'Industrial Brick',
+    sector: 'Aviation',
+    corianColor: 'Artista Mist',
+    mood: ['subtle', 'refined', 'calm'],
+    isBacklit: false,
+    keywords: ['industrial', 'brick', 'artista', 'mist', 'grey', 'gray', 'subtle', 'aviation'],
+    image: `${CLOUDINARY_BASE}/Artista_Mist_Industrial_zfaemp.png`,
+    specs: { material: 'DuPont Corian®', color: 'Artista Mist', maxPanel: '144" × 60"', leadTime: '6-10 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
+    description: 'Industrial Brick in Artista Mist — subtle movement in the surface.'
+  },
+  {
+    id: 'industrial-brick-laguna',
+    pattern: 'Industrial Brick',
+    patternFamily: 'Industrial Brick',
+    title: 'Industrial Brick',
+    sector: 'Aviation',
+    corianColor: 'Laguna',
+    mood: ['bold', 'dramatic', 'statement'],
+    isBacklit: false,
+    keywords: ['industrial', 'brick', 'laguna', 'blue', 'deep', 'bold', 'statement', 'aviation', 'branding'],
+    image: `${CLOUDINARY_BASE}/Laguna-blue-industrial_ksz6w7.png`,
+    specs: { material: 'DuPont Corian®', color: 'Laguna', maxPanel: '144" × 60"', leadTime: '6-10 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
+    description: 'Industrial Brick in Laguna — bold deep blue. Makes a real statement.'
+  },
+  {
+    id: 'industrial-brick-verdant',
+    pattern: 'Industrial Brick',
+    patternFamily: 'Industrial Brick',
+    title: 'Industrial Brick',
+    sector: 'Aviation',
+    corianColor: 'Verdant',
+    mood: ['natural', 'calm', 'biophilic'],
+    isBacklit: false,
+    keywords: ['industrial', 'brick', 'verdant', 'green', 'teal', 'nature', 'calming', 'aviation'],
+    image: `${CLOUDINARY_BASE}/Verdant_Industrial_bmkodk.png`,
+    specs: { material: 'DuPont Corian®', color: 'Verdant', maxPanel: '144" × 60"', leadTime: '6-10 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
+    description: 'Industrial Brick in Verdant — brings nature in. The deep teal is surprisingly calming.'
+  },
+
+  // BILLOW
+  {
+    id: 'billow-render',
+    pattern: 'Billow',
+    title: 'Billow White',
+    sector: 'General',
+    corianColor: 'Glacier White',
+    mood: ['calm', 'organic', 'flowing'],
+    isBacklit: false,
+    keywords: ['billow', 'wave', 'organic', 'flowing', 'texture', 'white', 'calm'],
+    image: `${CLOUDINARY_BASE}/Billow_-_Render-001_copy_ujsmd4.png`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
+    description: 'Billow pattern — gentle horizontal waves like wind across water. Organic, calming.'
+  },
+
+  // SEATTLE
+  {
+    id: 'seattle-1',
+    pattern: 'Seattle',
+    title: 'Seattle Tiles',
+    sector: 'Healthcare',
+    corianColor: 'Mixed',
+    mood: ['calm', 'modular', 'clinical'],
+    isBacklit: false,
+    keywords: ['seattle', 'tile', 'modular', 'healthcare', 'hospital', 'corridor'],
+    image: `${CLOUDINARY_BASE}/Seattle-V2-tile-02_bvcqwc.png`,
+    specs: { material: 'DuPont Corian®', color: 'Mixed (Dove + Glacier White)', maxPanel: '24" × 24" tiles', leadTime: '4 Weeks', pricePerSF: 35, system: 'Modular Tile' },
+    description: 'Seattle modular tiles — alternating carved wave and flat panels. Perfect for healthcare.'
+  },
+
+  // GREAT WAVE
+  {
+    id: 'greatwave-1',
+    pattern: 'Great Wave',
+    title: 'Great Wave Artistic',
+    sector: 'Hospitality',
+    corianColor: 'Glacier White',
+    mood: ['dramatic', 'artistic', 'statement'],
+    isBacklit: false,
+    keywords: ['great wave', 'wave', 'ocean', 'japanese', 'hokusai', 'dramatic', 'artistic'],
+    image: `${CLOUDINARY_BASE}/Great_Wave_banana_03_copy_herewl.png`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 48"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
+    description: 'Great Wave — inspired by Hokusai. Dramatic, artistic statement piece.'
+  },
+  {
+    id: 'greatwave-shower',
+    pattern: 'Great Wave',
+    title: 'Great Wave Shower',
+    sector: 'Residential',
+    corianColor: 'Glacier White',
+    mood: ['calm', 'luxury', 'spa'],
+    isBacklit: false,
+    keywords: ['great wave', 'shower', 'bathroom', 'residential', 'luxury', 'spa'],
+    image: `${CLOUDINARY_BASE}/Lim_Great_Wave_shower_contrast_square_copy_yvkh08.jpg`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 48"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
+    description: 'Great Wave in residential shower — seamless, no grout lines.'
+  },
+  {
+    id: 'greatwave-exterior',
+    pattern: 'Great Wave',
+    title: 'Great Wave Exterior',
+    sector: 'Residential',
+    corianColor: 'Glacier White',
+    mood: ['dramatic', 'outdoor'],
+    isBacklit: false,
+    keywords: ['great wave', 'exterior', 'facade', 'outdoor', 'pool'],
+    image: `${CLOUDINARY_BASE}/Great_Wave_banana_20_copy_abzou8.png`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 48"', leadTime: '8 Weeks', pricePerSF: 65, enhancement: 'UV-Stable Exterior', system: 'French Cleat' },
+    description: 'Great Wave on exterior facade — UV-stable formulation handles full sun.'
+  },
+  {
+    id: 'greatwave-restaurant',
+    pattern: 'Great Wave',
+    title: 'Great Wave Restaurant',
+    sector: 'Hospitality',
+    corianColor: 'Glacier White',
+    mood: ['dramatic', 'statement', 'social'],
+    isBacklit: false,
+    keywords: ['great wave', 'restaurant', 'hospitality', 'dining', 'feature wall'],
+    image: `${CLOUDINARY_BASE}/Great_Wave_banana_09_copy_lcqfa0.png`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 48"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
+    description: 'Great Wave as restaurant feature wall — photographs beautifully.'
+  },
+  {
+    id: 'greatwave-lobby',
+    pattern: 'Great Wave',
+    title: 'Great Wave Lobby',
+    sector: 'Corporate',
+    corianColor: 'Glacier White',
+    mood: ['dramatic', 'bold', 'corporate'],
+    isBacklit: false,
+    keywords: ['great wave', 'lobby', 'corporate', 'reception', 'feature wall'],
+    image: `${CLOUDINARY_BASE}/Great_Wave_banana_16_copy_ojsshm.png`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 48"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
+    description: 'Great Wave in corporate lobby — makes a statement about creativity.'
+  },
+
+  // BRICK WATER FEATURE
+  {
+    id: 'brick-water-1',
+    pattern: 'Brick',
+    title: 'Brick Water Feature',
+    sector: 'Residential',
+    corianColor: 'Deep Nocturne',
+    mood: ['dramatic', 'luxury', 'tropical'],
+    isBacklit: false,
+    keywords: ['brick', 'water', 'fountain', 'pool', 'waterfall', 'outdoor', 'black'],
+    image: `${CLOUDINARY_BASE}/Brick_waterfeature_05_copy_kewkyh.png`,
+    specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 85, enhancement: 'Water Feature', system: 'InterlockPanel™' },
+    description: 'Brick pattern water feature in black — carved lines channel water into waterfalls.'
+  },
+  {
+    id: 'brick-water-2',
+    pattern: 'Brick',
+    title: 'Brick Pool Wall',
+    sector: 'Residential',
+    corianColor: 'Deep Nocturne',
+    mood: ['dramatic', 'resort', 'luxury'],
+    isBacklit: false,
+    keywords: ['brick', 'water', 'pool', 'outdoor', 'cabana', 'resort', 'black'],
+    image: `${CLOUDINARY_BASE}/Brick_waterfeature_18_copy_oce67r.png`,
+    specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 85, enhancement: 'Water Feature', system: 'InterlockPanel™' },
+    description: 'Monumental Brick water feature in black anchoring resort-style pool.'
+  },
+  {
+    id: 'brick-water-3',
+    pattern: 'Brick',
+    title: 'Brick Backlit + Water',
+    sector: 'Residential',
+    corianColor: 'Glacier White',
+    mood: ['dramatic', 'luxury', 'glowing'],
+    isBacklit: true,
+    keywords: ['brick', 'water', 'backlit', 'backlight', 'glow', 'night', 'dramatic', 'white'],
+    image: `${CLOUDINARY_BASE}/Brick_waterfeature_20_copy_ffh4px.png`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '10 Weeks', pricePerSF: 120, enhancement: 'Backlit + Water Feature', system: 'InterlockPanel™' },
+    description: 'Brick with backlighting AND water — light glows through carved channels.'
+  },
+  {
+    id: 'brick-water-4',
+    pattern: 'Brick',
+    title: 'Brick Night Ambient',
+    sector: 'Residential',
+    corianColor: 'Deep Nocturne',
+    mood: ['dramatic', 'evening', 'ambient'],
+    isBacklit: false,
+    keywords: ['brick', 'water', 'night', 'evening', 'black', 'ambient'],
+    image: `${CLOUDINARY_BASE}/Brick_waterfeature_27_copy_nxcqhx.png`,
+    specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 85, enhancement: 'Water Feature', system: 'InterlockPanel™' },
+    description: 'Brick water feature at night — uplighting catches the spray.'
+  },
+  {
+    id: 'brick-water-5',
+    pattern: 'Brick',
+    title: 'Brick Daylight',
+    sector: 'Residential',
+    corianColor: 'Deep Nocturne',
+    mood: ['natural', 'outdoor', 'daylight'],
+    isBacklit: false,
+    keywords: ['brick', 'water', 'day', 'daylight', 'natural', 'pool', 'black'],
+    image: `${CLOUDINARY_BASE}/Brick_waterfeature_12_copy_gdmjok.png`,
+    specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 85, enhancement: 'Water Feature', system: 'InterlockPanel™' },
+    description: 'Brick water feature in bright daylight — texture catches sun.'
+  },
+
+  // BUDDHA (backlit)
+  {
+    id: 'buddha-1',
+    pattern: 'Buddha Mandala',
+    title: 'Buddha Mandala Spa',
+    sector: 'Wellness',
+    corianColor: 'Glacier White',
+    mood: ['calm', 'spiritual', 'meditation', 'zen'],
+    isBacklit: true,
+    keywords: ['buddha', 'zen', 'meditation', 'spiritual', 'calm', 'spa', 'wellness', 'backlit', 'backlight', 'glow'],
+    image: `${CLOUDINARY_BASE}/spa-_Buddha_2_zid08z.png`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 75, enhancement: 'Backlighting', system: 'InterlockPanel™' },
+    description: 'Buddha mandala — custom carved with intricate detail. Backlit for ethereal glow.'
+  },
+  {
+    id: 'buddha-2',
+    pattern: 'Buddha Mandala',
+    title: 'Buddha Restaurant',
+    sector: 'Hospitality',
+    corianColor: 'Glacier White',
+    mood: ['calm', 'zen', 'warm', 'dining'],
+    isBacklit: true,
+    keywords: ['buddha', 'restaurant', 'asian', 'zen', 'dining', 'backlit', 'backlight'],
+    image: `${CLOUDINARY_BASE}/Spa_Buddha_restaurant_yybtdi.png`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 75, enhancement: 'Backlighting', system: 'InterlockPanel™' },
+    description: 'Buddha in restaurant setting — warm backlighting sets the mood.'
+  },
+
+  // MARILYN
+  {
+    id: 'marilyn-1',
+    pattern: 'Custom Portrait',
+    title: 'Marilyn Portrait',
+    sector: 'Hospitality',
+    corianColor: 'Glacier White',
+    mood: ['artistic', 'bold', 'custom', 'iconic'],
+    isBacklit: false,
+    keywords: ['marilyn', 'portrait', 'hollywood', 'custom', 'branding', 'art', 'celebrity'],
+    image: `${CLOUDINARY_BASE}/Marilynn_sm_copy_gcvzcb.jpg`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 85, system: 'InterlockPanel™' },
+    description: 'Custom Marilyn portrait — any image can be carved. Brand logos, celebrities, custom artwork.'
+  },
+  {
+    id: 'marilyn-2',
+    pattern: 'Custom Portrait',
+    title: 'Marilyn Art',
+    sector: 'Art',
+    corianColor: 'Glacier White',
+    mood: ['artistic', 'gallery', 'sculptural'],
+    isBacklit: false,
+    keywords: ['marilyn', 'portrait', 'art', 'gallery', 'sculpture'],
+    image: `${CLOUDINARY_BASE}/Maryilynn2_c71acw.png`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 85, system: 'InterlockPanel™' },
+    description: 'Marilyn as gallery art piece — carved Corian bridges architecture and fine art.'
+  },
+
+  // FINS
+  {
+    id: 'fins-1',
+    pattern: 'Fins',
+    title: 'Fins Exterior',
+    sector: 'Corporate',
+    corianColor: 'Glacier White',
+    mood: ['modern', 'architectural', 'shadow'],
+    isBacklit: false,
+    keywords: ['fins', 'exterior', 'facade', 'corporate', 'modern', 'dimensional'],
+    image: `${CLOUDINARY_BASE}/Fins_exterior_white_gcccvq.jpg`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '120" × 60"', leadTime: '8 Weeks', pricePerSF: 75, enhancement: 'UV-Stable Exterior', system: 'French Cleat' },
+    description: 'Fins pattern on exterior facade — dimensional fins create deep shadow lines.'
+  },
+  {
+    id: 'fins-2',
+    pattern: 'Fins',
+    title: 'Fins Patio',
+    sector: 'Hospitality',
+    corianColor: 'Glacier White',
+    mood: ['outdoor', 'dining', 'architectural'],
+    isBacklit: false,
+    keywords: ['fins', 'exterior', 'patio', 'restaurant', 'outdoor', 'dining'],
+    image: `${CLOUDINARY_BASE}/Fins_exterior2_lh1vlw.jpg`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '120" × 60"', leadTime: '8 Weeks', pricePerSF: 75, enhancement: 'UV-Stable Exterior', system: 'French Cleat' },
+    description: 'Fins on restaurant patio — architectural backdrop for outdoor dining.'
+  },
+
+  // FLAME
+  {
+    id: 'flame-1',
+    pattern: 'Flame',
+    title: 'Flame Pattern',
+    sector: 'General',
+    corianColor: 'Glacier White',
+    mood: ['warm', 'organic', 'flowing', 'vertical'],
+    isBacklit: false,
+    keywords: ['flame', 'fire', 'warm', 'organic', 'flowing', 'vertical'],
+    image: `${CLOUDINARY_BASE}/Flame-_qle4y3.jpg`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
+    description: 'Flame pattern — flowing vertical waves that interweave. Warm, organic, dynamic.'
+  },
+  {
+    id: 'flame-bed',
+    pattern: 'Flame',
+    title: 'Flame Headboard',
+    sector: 'Residential',
+    corianColor: 'Glacier White',
+    mood: ['warm', 'intimate', 'luxury'],
+    isBacklit: false,
+    keywords: ['flame', 'bedroom', 'headboard', 'residential', 'luxury', 'warm'],
+    image: `${CLOUDINARY_BASE}/Flamebed_yggqrp.jpg`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
+    description: 'Flame as headboard wall — warm, inviting, perfect for primary bedroom.'
+  },
+  {
+    id: 'flame-pink',
+    pattern: 'Flame',
+    title: 'Flame Pink RGB',
+    sector: 'Residential',
+    corianColor: 'Glacier White',
+    mood: ['dramatic', 'romantic', 'bold', 'glowing'],
+    isBacklit: true,
+    keywords: ['flame', 'pink', 'rgb', 'backlit', 'backlight', 'bedroom', 'romantic', 'glow'],
+    image: `${CLOUDINARY_BASE}/Flame_pink_obxnpm.jpg`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 65, enhancement: 'RGB Backlighting', system: 'InterlockPanel™' },
+    description: 'Flame with pink RGB backlighting — dramatic, romantic atmosphere.'
+  },
+  {
+    id: 'flame-lobby',
+    pattern: 'Flame',
+    title: 'Flame Lobby',
+    sector: 'Hospitality',
+    corianColor: 'Glacier White',
+    mood: ['warm', 'energy', 'dramatic'],
+    isBacklit: false,
+    keywords: ['flame', 'lobby', 'feature', 'hospitality', 'hotel'],
+    image: `${CLOUDINARY_BASE}/Flames_qthl01.jpg`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
+    description: 'Flame in hospitality lobby — vertical movement draws the eye up.'
+  },
+
+  // DESERT SUNSET
+  {
+    id: 'desert-sunset-1',
+    pattern: 'Desert Sunset',
+    title: 'Desert Sunset Cactus',
+    sector: 'Hospitality',
+    corianColor: 'Glacier White',
+    mood: ['calm', 'regional', 'warm', 'southwestern'],
+    isBacklit: true,
+    keywords: ['desert', 'sunset', 'cactus', 'arizona', 'southwest', 'scottsdale', 'backlit', 'backlight'],
+    image: `${CLOUDINARY_BASE}/v1768111216/mr-render-1767989995638_copy_vtszj0.png`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', height: '142"', width: '239¾"', slabs: 5, leadTime: '4 Weeks', pricePerSF: 35, enhancement: 'Backlighting', system: 'InterlockPanel™' },
+    shopDrawing: `${CLOUDINARY_BASE}/v1768330379/shop_drawing-Cactus_rovjta.png`,
+    description: 'Desert Sunset — saguaro cactus silhouettes against carved mountain ridges. Southwest hospitality.'
+  },
+  {
+    id: 'desert-sunset-2',
+    pattern: 'Desert Sunset',
+    title: 'Desert Sunset Mountains',
+    sector: 'Hospitality',
+    corianColor: 'Glacier White',
+    mood: ['calm', 'warm', 'southwestern'],
+    isBacklit: false,
+    keywords: ['desert', 'sunset', 'mountain', 'landscape', 'southwest', 'warm'],
+    image: `${CLOUDINARY_BASE}/v1768111216/mr-render-1767992780170_ufyyef.png`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4 Weeks', pricePerSF: 35, system: 'InterlockPanel™' },
+    description: 'Desert Sunset variation — mountain ridges and desert sky.'
+  },
+  {
+    id: 'desert-sunset-3',
+    pattern: 'Desert Sunset',
+    title: 'Desert Mountains Orange',
+    sector: 'Hospitality',
+    corianColor: 'Glacier White',
+    mood: ['warm', 'sunset', 'southwestern'],
+    isBacklit: false,
+    keywords: ['desert', 'mountain', 'landscape', 'warm', 'orange', 'hospitality'],
+    image: `${CLOUDINARY_BASE}/mr-render-1768082338412_copy_wqymkx.png`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4 Weeks', pricePerSF: 35, system: 'InterlockPanel™' },
+    description: 'Desert mountain landscape — carved ridgelines evoke the Southwest.'
+  },
+  {
+    id: 'desert-sunset-4',
+    pattern: 'Desert Sunset',
+    title: 'Desert Abstract',
+    sector: 'Hospitality',
+    corianColor: 'Glacier White',
+    mood: ['calm', 'abstract', 'minimal'],
+    isBacklit: false,
+    keywords: ['desert', 'abstract', 'landscape', 'artistic'],
+    image: `${CLOUDINARY_BASE}/mr-render-1767989272197_copy_eka0g1.png`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4 Weeks', pricePerSF: 35, system: 'InterlockPanel™' },
+    description: 'Desert Sunset abstract — simplified mountain forms.'
+  },
+
+  // SAND DUNE
+  {
+    id: 'sanddune-curved-black',
+    pattern: 'Sand Dune',
+    title: 'Sand Dune Curved',
+    sector: 'Corporate',
+    corianColor: 'Deep Nocturne',
+    mood: ['dramatic', 'sculptural', 'bold'],
+    isBacklit: false,
+    keywords: ['sand dune', 'curved', 'black', 'column', 'dramatic', 'thermoformed'],
+    image: `${CLOUDINARY_BASE}/Fins_Sandune_texture_Curved_black_m1vtil.png`,
+    specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '10 Weeks', pricePerSF: 95, enhancement: 'Thermoformed Curve', system: 'InterlockPanel™' },
+    description: 'Sand Dune pattern thermoformed into dramatic curved column.'
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SMART FAMILY GROUPING
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const getFamilyImages = (selectedImage) => {
+  if (!selectedImage) return [];
+  
+  // Tier 1: Same pattern family, different colors
+  if (selectedImage.patternFamily) {
+    const colorVariants = IMAGE_CATALOG.filter(
+      img => img.patternFamily === selectedImage.patternFamily && img.id !== selectedImage.id
+    );
+    if (colorVariants.length >= 3) return colorVariants.slice(0, 4);
+  }
+  
+  // Tier 2: Same pattern, different applications
+  const patternVariants = IMAGE_CATALOG.filter(
+    img => img.pattern === selectedImage.pattern && img.id !== selectedImage.id
+  );
+  if (patternVariants.length >= 3) return patternVariants.slice(0, 4);
+  
+  // Tier 3: Similar attributes
+  const similar = IMAGE_CATALOG.map(img => {
+    if (img.id === selectedImage.id) return { ...img, score: -1 };
+    let score = 0;
+    if (selectedImage.isBacklit && img.isBacklit) score += 5;
+    if (selectedImage.specs.enhancement && img.specs.enhancement === selectedImage.specs.enhancement) score += 3;
+    const sharedMoods = selectedImage.mood?.filter(m => img.mood?.includes(m)) || [];
+    score += sharedMoods.length * 2;
+    if (img.sector === selectedImage.sector) score += 2;
+    const sharedKeywords = selectedImage.keywords.filter(k => img.keywords.includes(k));
+    score += Math.min(sharedKeywords.length, 3);
+    return { ...img, score };
+  })
+  .filter(img => img.score > 2)
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 4);
+  
+  if (similar.length < 2) {
+    return IMAGE_CATALOG.filter(img => img.id !== selectedImage.id).slice(0, 4);
+  }
+  return similar;
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SEARCH - Strict backlight filtering
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const searchImages = (query) => {
+  if (!query) return [];
+  const lower = query.toLowerCase();
+  
+  // STRICT BACKLIGHT
+  if (lower.includes('backlight') || lower.includes('backlit') || lower.includes('glow') || lower.includes('illuminat')) {
+    return IMAGE_CATALOG.filter(img => img.isBacklit === true).slice(0, 2);
+  }
+  
+  const terms = lower.split(/\s+/).filter(t => t.length > 2);
+  const scored = IMAGE_CATALOG.map(img => {
+    let score = 0;
+    terms.forEach(term => {
+      if (img.keywords.some(k => k.includes(term))) score += 15;
+      if (img.pattern.toLowerCase().includes(term)) score += 12;
+      if (img.sector.toLowerCase().includes(term)) score += 10;
+      if (img.title.toLowerCase().includes(term)) score += 8;
+      if (img.mood?.some(m => m.includes(term))) score += 6;
+      if (img.corianColor?.toLowerCase().includes(term)) score += 5;
+    });
+    return { ...img, score };
+  });
+  
+  return scored.filter(img => img.score > 0).sort((a, b) => b.score - a.score).slice(0, 2);
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MARA SYSTEM PROMPT
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const MARA_SYSTEM_PROMPT = `You are Mara, the MR Walls design assistant. Brief, warm, knowledgeable.
+
+## RULES
+1. MAX 50 words
+2. Use [Image: id] tags for images (max 2)
+3. ONE question per response
+
+## BACKLIGHT IMAGES ONLY (isBacklit: true)
+- buddha-1, buddha-2
+- brick-water-3
+- flame-pink
+- desert-sunset-1
+
+When user asks "backlight" → ONLY show from this list.
+
+## OTHER IDS
+- Industrial Brick: industrial-brick-carbon, industrial-brick-laguna, etc.
+- Billow: billow-render
+- Great Wave: greatwave-1, greatwave-shower, etc.
+- Brick: brick-water-1 through 5
+- Flame: flame-1, flame-bed, flame-pink, flame-lobby
+- Desert Sunset: desert-sunset-1 through 4
+
+Remember: Warm, brief, show max 2 images.`;
+
+const extractImageTags = (text) => {
+  const matches = text.match(/\[Image:\s*([^\]]+)\]/g) || [];
+  return matches.map(m => {
+    const id = m.match(/\[Image:\s*([^\]]+)\]/)[1].trim();
+    return IMAGE_CATALOG.find(img => img.id === id);
+  }).filter(Boolean);
+};
+
+const cleanResponse = (text) => text.replace(/\[Image:\s*[^\]]+\]/g, '').trim();
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export default function MaraV14() {
+  const [messages, setMessages] = useState([
+    {
+      role: 'assistant',
+      text: "Hey! I'm Mara from MR Walls. I help architects explore carved Corian surfaces.\n\nTap an image to explore, or ask me anything:",
+      images: [
+        IMAGE_CATALOG.find(i => i.id === 'buddha-1'),
+        IMAGE_CATALOG.find(i => i.id === 'greatwave-1')
+      ]
+    }
+  ]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [familyImages, setFamilyImages] = useState([]);
+  const [specsImage, setSpecsImage] = useState(null);
+  const [showGallery, setShowGallery] = useState(false);
+  const [history, setHistory] = useState([]);
+  const messagesEndRef = useRef(null);
+  const modalInputRef = useRef(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const getGalleryPatterns = () => {
+    const patterns = {};
+    IMAGE_CATALOG.forEach(img => {
+      if (!patterns[img.pattern]) patterns[img.pattern] = [];
+      patterns[img.pattern].push(img);
+    });
+    return patterns;
+  };
+
+  const handleImageClick = (img) => {
+    const family = getFamilyImages(img);
+    setSelectedImage(img);
+    setFamilyImages(family);
+    setSpecsImage(null);
+  };
+
+  const handleFamilyClick = (img) => {
+    setSpecsImage(img);
+  };
+
+  const closeModal = () => {
+    setSelectedImage(null);
+    setFamilyImages([]);
+    setSpecsImage(null);
+  };
+
+  const closeSpecs = () => {
+    setSpecsImage(null);
+  };
+
+  const callClaude = async (userMsg, hist) => {
+    const apiMessages = [...hist, { role: 'user', content: userMsg }];
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+          'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY,
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 300,
+          system: MARA_SYSTEM_PROMPT,
+          messages: apiMessages
+        })
+      });
+      const data = await response.json();
+      if (data.content?.[0]) return data.content[0].text;
+      throw new Error(data.error?.message || 'API error');
+    } catch (error) {
+      console.error('Claude API error:', error);
+      return null;
+    }
+  };
+
+  const send = async (text, fromModal = false) => {
+    if (!text?.trim() || loading) return;
+    
+    const userMsg = text.trim();
+    const lower = userMsg.toLowerCase();
+    
+    // Browse intent
+    if (lower.includes('everything') || lower.includes('all image') || lower.includes('browse') || lower.includes('scroll') || lower.includes('gallery') || lower.includes('show me all') || lower.includes('see all')) {
+      setMessages(m => [...m, 
+        { role: 'user', text: userMsg },
+        { role: 'assistant', text: "Here's our full collection — tap any image to explore.", images: [] }
+      ]);
+      setShowGallery(true);
+      if (fromModal) closeModal();
+      return;
+    }
+    
+    setInput('');
+    setMessages(m => [...m, { role: 'user', text: userMsg }]);
+    setLoading(true);
+
+    const claudeResponse = await callClaude(userMsg, history);
+    
+    let responseText = '';
+    let responseImages = [];
+    
+    if (claudeResponse) {
+      responseImages = extractImageTags(claudeResponse);
+      responseText = cleanResponse(claudeResponse);
+      setHistory([...history, 
+        { role: 'user', content: userMsg },
+        { role: 'assistant', content: claudeResponse }
+      ]);
+    }
+    
+    if (!claudeResponse || responseImages.length === 0) {
+      responseImages = searchImages(userMsg);
+      if (responseImages.length > 0) {
+        responseText = responseText || `Here's what I found:`;
+      } else {
+        responseText = responseText || "What sector is this for — healthcare, hospitality, residential?";
+        responseImages = [IMAGE_CATALOG.find(i => i.id === 'buddha-1'), IMAGE_CATALOG.find(i => i.id === 'billow-render')];
+      }
+    }
+
+    setMessages(m => [...m, {
+      role: 'assistant',
+      text: responseText,
+      images: responseImages.slice(0, 2)
+    }]);
+    
+    setLoading(false);
+    
+    // If sent from modal, close it so user sees the new response
+    if (fromModal) closeModal();
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // RENDER
+  // ─────────────────────────────────────────────────────────────────────────────
+  return (
+    <div className="h-screen bg-stone-950 text-stone-100 flex flex-col" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+      
+      {/* Header */}
+      <header className="p-4 border-b border-stone-800 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center">
+            <span className="text-lg font-semibold text-stone-300">M</span>
+          </div>
+          <div>
+            <h1 className="font-semibold text-stone-100">Mara</h1>
+            <p className="text-xs text-stone-500">MR Walls × Corian® Design</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setShowGallery(true)}
+          className="flex items-center gap-2 px-3 py-2 bg-stone-900 hover:bg-stone-800 rounded-lg border border-stone-700 text-sm text-stone-300 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+          Browse All
+        </button>
+      </header>
+
+      {/* Messages */}
+      <main className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((msg, i) => (
+          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className="max-w-[85%]">
+              <div className={`rounded-2xl px-4 py-3 ${
+                msg.role === 'user' 
+                  ? 'bg-stone-700 text-stone-100' 
+                  : 'bg-stone-900 border border-stone-800'
+              }`}>
+                <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
+              </div>
+              
+              {msg.images && msg.images.length > 0 && (
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  {msg.images.map((img, j) => (
+                    <button
+                      key={j}
+                      onClick={() => handleImageClick(img)}
+                      className="relative aspect-[4/3] rounded-xl overflow-hidden border border-stone-800 hover:border-stone-600 transition-all text-left"
+                    >
+                      <img src={img.image} alt={img.title} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        <p className="text-sm font-medium text-white truncate">{img.title}</p>
+                        <p className="text-xs text-stone-400">{img.pattern} • {img.sector}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+        
+        {loading && (
+          <div className="flex justify-start">
+            <div className="bg-stone-900 border border-stone-800 rounded-2xl px-4 py-3">
+              <div className="flex gap-1">
+                <span className="w-2 h-2 bg-stone-600 rounded-full animate-bounce" />
+                <span className="w-2 h-2 bg-stone-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-2 h-2 bg-stone-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </main>
+
+      {/* Input */}
+      <footer className="p-4 border-t border-stone-800">
+        <div className="flex gap-3">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && send(input)}
+            placeholder="Ask about patterns, colors, backlighting..."
+            disabled={loading}
+            className="flex-1 px-4 py-3 bg-stone-900 border border-stone-700 rounded-xl text-sm focus:outline-none focus:border-stone-500 disabled:opacity-50"
+          />
+          <button
+            onClick={() => send(input)}
+            disabled={loading || !input.trim()}
+            className="px-5 py-3 bg-stone-100 text-stone-900 rounded-xl font-medium text-sm hover:bg-white disabled:opacity-50 transition-colors"
+          >
+            Send
+          </button>
+        </div>
+      </footer>
+
+      {/* FAMILY MODAL - with Mara input */}
+      {selectedImage && !specsImage && (
+        <div className="fixed inset-0 bg-black/90 z-50 overflow-y-auto">
+          <div className="max-w-4xl mx-auto p-4">
+            {/* Close + Browse buttons */}
+            <div className="flex justify-between items-center mb-4">
+              <button
+                onClick={() => setShowGallery(true)}
+                className="flex items-center gap-2 px-3 py-2 bg-stone-800 hover:bg-stone-700 rounded-lg text-sm text-stone-300"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                Browse All
+              </button>
+              <button 
+                onClick={closeModal}
+                className="w-10 h-10 bg-stone-800 hover:bg-stone-700 rounded-full flex items-center justify-center text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Selected Image */}
+            <div className="aspect-video relative rounded-xl overflow-hidden mb-4">
+              <img src={selectedImage.image} alt={selectedImage.title} className="w-full h-full object-cover" />
+              <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg px-4 py-2">
+                <div className="text-lg font-medium">{selectedImage.title}</div>
+                <div className="text-sm text-stone-300">{selectedImage.pattern} • {selectedImage.sector}</div>
+              </div>
+            </div>
+
+            {/* Mara Panel */}
+            <div className="bg-stone-900 border border-stone-800 rounded-xl p-4 mb-4">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center text-xs font-medium shrink-0">M</div>
+                <div className="flex-1">
+                  <p className="text-sm text-stone-300">{selectedImage.description}</p>
+                  <p className="text-sm text-stone-500 mt-2">Tap a related image below for specs, or ask me anything.</p>
+                </div>
+              </div>
+              
+              {/* Mara Input in Modal */}
+              <div className="flex gap-2">
+                <input
+                  ref={modalInputRef}
+                  placeholder="Ask Mara about this pattern..."
+                  className="flex-1 px-3 py-2 bg-stone-800 border border-stone-700 rounded-lg text-sm focus:outline-none focus:border-stone-500"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.target.value.trim()) {
+                      send(e.target.value, true);
+                      e.target.value = '';
+                    }
+                  }}
+                />
+                <button
+                  onClick={() => {
+                    if (modalInputRef.current?.value.trim()) {
+                      send(modalInputRef.current.value, true);
+                      modalInputRef.current.value = '';
+                    }
+                  }}
+                  className="px-4 py-2 bg-stone-100 text-stone-900 rounded-lg text-sm font-medium hover:bg-white"
+                >
+                  Ask
+                </button>
+              </div>
+            </div>
+
+            {/* Family Grid */}
+            <div className="grid grid-cols-4 gap-3 mb-4">
+              {familyImages.map((img, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleFamilyClick(img)}
+                  className="relative aspect-square rounded-lg overflow-hidden border border-stone-700 hover:border-stone-500 transition-all"
+                >
+                  <img src={img.image} alt={img.title} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-1 left-1 right-1">
+                    <p className="text-[10px] text-white truncate">{img.title}</p>
+                    {img.corianColor && CORIAN_COLORS[img.corianColor] && (
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <div className="w-2 h-2 rounded-full border border-white/30" style={{ backgroundColor: CORIAN_COLORS[img.corianColor].hex }} />
+                        <span className="text-[8px] text-stone-400">{img.corianColor}</span>
+                      </div>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* View Specs Button */}
+            <button
+              onClick={() => handleFamilyClick(selectedImage)}
+              className="w-full py-3 bg-stone-800 hover:bg-stone-700 rounded-xl text-sm font-medium"
+            >
+              View Full Specs for {selectedImage.title}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* SPECS MODAL */}
+      {specsImage && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={closeSpecs}>
+          <div className="bg-stone-950 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto border border-stone-800" onClick={(e) => e.stopPropagation()}>
+            <div className="aspect-video relative bg-stone-900">
+              <img src={specsImage.image} alt={specsImage.title} className="w-full h-full object-cover" />
+              <button onClick={closeSpecs} className="absolute top-4 right-4 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70">✕</button>
+            </div>
+            
+            <div className="p-6">
+              <h2 className="text-xl font-semibold text-stone-100 mb-1">{specsImage.title}</h2>
+              <p className="text-sm text-stone-400 mb-4">{specsImage.pattern} • {specsImage.sector}</p>
+              <p className="text-sm text-stone-300 mb-6">{specsImage.description}</p>
+              
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div><p className="text-xs text-stone-500 uppercase">Material</p><p className="text-sm text-stone-200">{specsImage.specs.material}</p></div>
+                <div><p className="text-xs text-stone-500 uppercase">Color</p><p className="text-sm text-stone-200">{specsImage.corianColor || specsImage.specs.color}</p></div>
+                <div><p className="text-xs text-stone-500 uppercase">Max Panel</p><p className="text-sm text-stone-200">{specsImage.specs.maxPanel || `${specsImage.specs.height} × ${specsImage.specs.width}`}</p></div>
+                <div><p className="text-xs text-stone-500 uppercase">Lead Time</p><p className="text-sm text-stone-200">{specsImage.specs.leadTime}</p></div>
+                <div><p className="text-xs text-stone-500 uppercase">System</p><p className="text-sm text-stone-200">{specsImage.specs.system}</p></div>
+                <div><p className="text-xs text-stone-500 uppercase">Price</p><p className="text-sm text-stone-200">${specsImage.specs.pricePerSF}/SF</p></div>
+                {specsImage.specs.enhancement && (
+                  <div className="col-span-2"><p className="text-xs text-stone-500 uppercase">Enhancement</p><p className="text-sm text-stone-200">{specsImage.specs.enhancement}</p></div>
+                )}
+              </div>
+              
+              <div className="flex gap-3">
+                <button className="flex-1 py-3 bg-stone-800 hover:bg-stone-700 rounded-xl font-medium text-sm border border-stone-700">Download Specs</button>
+                <button className="flex-1 py-3 bg-stone-100 text-stone-900 hover:bg-white rounded-xl font-medium text-sm">Request Quote</button>
+              </div>
+              
+              {specsImage.shopDrawing && (
+                <a href={specsImage.shopDrawing} target="_blank" rel="noopener noreferrer" className="block mt-4 text-center text-sm text-stone-400 hover:text-stone-200 underline">View Shop Drawing →</a>
+              )}
+              
+              <button onClick={closeSpecs} className="mt-4 w-full py-2 text-sm text-stone-500 hover:text-stone-300">← Back to related images</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* GALLERY MODAL */}
+      {showGallery && (
+        <div className="fixed inset-0 bg-black/95 z-50 overflow-y-auto">
+          <div className="max-w-6xl mx-auto p-4">
+            <div className="flex items-center justify-between mb-6 sticky top-0 bg-black/80 backdrop-blur-sm py-4 -mx-4 px-4 z-10">
+              <div>
+                <h2 className="text-xl font-semibold text-stone-100">Full Collection</h2>
+                <p className="text-sm text-stone-500">{IMAGE_CATALOG.length} images • Tap to explore</p>
+              </div>
+              <button onClick={() => setShowGallery(false)} className="w-10 h-10 bg-stone-800 hover:bg-stone-700 rounded-full flex items-center justify-center text-white">✕</button>
+            </div>
+
+            {Object.entries(getGalleryPatterns()).map(([pattern, images]) => (
+              <div key={pattern} className="mb-8">
+                <h3 className="text-sm font-medium text-stone-400 uppercase tracking-wide mb-3">{pattern}</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {images.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setShowGallery(false); handleImageClick(img); }}
+                      className="relative aspect-[4/3] rounded-lg overflow-hidden border border-stone-800 hover:border-stone-600 transition-all group"
+                    >
+                      <img src={img.image} alt={img.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-2">
+                        <p className="text-xs font-medium text-white truncate">{img.title}</p>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          {img.corianColor && CORIAN_COLORS[img.corianColor] && (
+                            <div className="w-2 h-2 rounded-full border border-white/30" style={{ backgroundColor: CORIAN_COLORS[img.corianColor].hex }} />
+                          )}
+                          <span className="text-[10px] text-stone-400">{img.sector}</span>
+                          {img.isBacklit && <span className="text-[10px] text-amber-400 ml-1">✦ Backlit</span>}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
