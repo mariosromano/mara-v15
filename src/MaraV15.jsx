@@ -788,9 +788,7 @@ export default function MaraV15() {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState([]);
   
-  // Typing intro state
-  const [introText, setIntroText] = useState('');
-  const [introComplete, setIntroComplete] = useState(false);
+  // Intro text (no typing effect - instant)
   const fullIntro = "Hey! I'm Mara from MR Walls. I help architects explore carved Corian surfaces.\n\nTap an image to explore, ask me anything, or ";
   const generateLinkText = "I can generate a custom visualization";
   const afterLink = " for your space.";
@@ -816,34 +814,18 @@ export default function MaraV15() {
   const messagesEndRef = useRef(null);
   const modalInputRef = useRef(null);
 
-  // Typing effect for intro
+  // Add initial images on mount (no typing effect)
   useEffect(() => {
-    if (introComplete) return;
-    
-    const fullText = fullIntro + generateLinkText + afterLink;
-    let i = 0;
-    const timer = setInterval(() => {
-      if (i < fullText.length) {
-        setIntroText(fullText.slice(0, i + 1));
-        i++;
-      } else {
-        clearInterval(timer);
-        setIntroComplete(true);
-        // Add initial images after intro completes
-        setMessages([{
-          role: 'assistant',
-          text: '',
-          images: [
-            IMAGE_CATALOG.find(i => i.id === 'buddha-1'),
-            IMAGE_CATALOG.find(i => i.id === 'greatwave-1')
-          ],
-          isIntroImages: true
-        }]);
-      }
-    }, 50);
-    
-    return () => clearInterval(timer);
-  }, [introComplete]);
+    setMessages([{
+      role: 'assistant',
+      text: '',
+      images: [
+        IMAGE_CATALOG.find(i => i.id === 'buddha-1'),
+        IMAGE_CATALOG.find(i => i.id === 'greatwave-1')
+      ],
+      isIntroImages: true
+    }]);
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -1191,17 +1173,18 @@ export default function MaraV15() {
 • 1/4" medium = defined pattern
 • 3/8"+ deep = dramatic bright transmission
 
-**Here's our installation detail showing the 3" spacing with acrylic stiffeners:**
-https://res.cloudinary.com/dtlodxxio/image/upload/v1765759401/Backlight_Install_Wip_detail.jpe_xmaf6u.jpg
-
-**And our InterlockPanel puzzle installation video:**
-https://res.cloudinary.com/dtlodxxio/video/upload/v1765772971/install_MR-LAX_720_-_puzzle_video_-_720_x_1280_m2ewcs.mp4
-
 Want me to show you some backlit patterns?`;
 
       setMessages(m => [...m,
         { role: 'user', text: userMsg },
-        { role: 'assistant', text: backlightResponse }
+        {
+          role: 'assistant',
+          text: backlightResponse,
+          media: [
+            { type: 'image', url: 'https://res.cloudinary.com/dtlodxxio/image/upload/v1765759401/Backlight_Install_Wip_detail.jpe_xmaf6u.jpg', caption: 'Installation detail — 3" spacing with acrylic stiffeners' },
+            { type: 'video', url: 'https://res.cloudinary.com/dtlodxxio/video/upload/v1765772971/install_MR-LAX_720_-_puzzle_video_-_720_x_1280_m2ewcs.mp4', caption: 'InterlockPanel puzzle installation' }
+          ]
+        }
       ]);
       if (fromModal) closeModal();
       return;
@@ -1249,18 +1232,12 @@ Want me to show you some backlit patterns?`;
   // RENDER
   // ═══════════════════════════════════════════════════════════════════════════════
   
-  // Render intro text with clickable generate link
+  // Render intro text with clickable generate link (instant, no typing)
   const renderIntroText = () => {
-    if (!introComplete) {
-      // Still typing
-      return <span>{introText}</span>;
-    }
-    
-    // Complete - render with clickable link
     return (
       <>
         {fullIntro}
-        <button 
+        <button
           onClick={startGenerateFlow}
           className="text-amber-400 hover:text-amber-300 underline underline-offset-2"
         >
@@ -1512,6 +1489,32 @@ Want me to show you some backlit patterns?`;
                         <p className="text-xs text-stone-400">{img.pattern} • {img.sector}</p>
                       </div>
                     </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Embedded media (images/videos) */}
+              {msg.media && msg.media.length > 0 && (
+                <div className={`space-y-3 ${msg.text ? 'mt-3' : ''}`}>
+                  {msg.media.map((item, j) => (
+                    <div key={j} className="rounded-xl overflow-hidden border border-stone-700">
+                      {item.type === 'image' && (
+                        <a href={item.url} target="_blank" rel="noopener noreferrer">
+                          <img src={item.url} alt={item.caption || 'Reference image'} className="w-full h-auto" />
+                        </a>
+                      )}
+                      {item.type === 'video' && (
+                        <video
+                          src={item.url}
+                          controls
+                          className="w-full h-auto"
+                          poster=""
+                        />
+                      )}
+                      {item.caption && (
+                        <p className="text-xs text-stone-400 p-2 bg-stone-900">{item.caption}</p>
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
