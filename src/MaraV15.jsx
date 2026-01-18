@@ -849,6 +849,8 @@ export default function MaraV15() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [familyImages, setFamilyImages] = useState([]);
   const [specsImage, setSpecsImage] = useState(null);
+  const [heroImage, setHeroImage] = useState(null); // Current hero image on product page
+  const [patternGallery, setPatternGallery] = useState([]); // Related images for pattern
   const [showGallery, setShowGallery] = useState(false);
   
   // AI Generate state
@@ -921,24 +923,39 @@ export default function MaraV15() {
   const handleImageClick = (img) => {
     // Go directly to product page
     setSpecsImage(img);
+    setHeroImage(img); // Set initial hero image
+    // Get related images from the same pattern (up to 4)
+    const related = IMAGE_CATALOG.filter(i => i.pattern === img.pattern && i.id !== img.id).slice(0, 4);
+    setPatternGallery(related);
     setSelectedImage(null);
     setFamilyImages([]);
   };
 
   const handleFamilyClick = (img) => {
     setSpecsImage(img);
+    setHeroImage(img);
+    const related = IMAGE_CATALOG.filter(i => i.pattern === img.pattern && i.id !== img.id).slice(0, 4);
+    setPatternGallery(related);
+  };
+
+  const swapHeroImage = (img) => {
+    setHeroImage(img);
   };
 
   const closeModal = () => {
     setSelectedImage(null);
     setFamilyImages([]);
     setSpecsImage(null);
+    setHeroImage(null);
+    setPatternGallery([]);
   };
 
   const closeSpecs = () => {
     setSpecsImage(null);
     setSelectedImage(null);
     setFamilyImages([]);
+    setHeroImage(null);
+    setPatternGallery([]);
   };
 
   // ═══════════════════════════════════════════════════════════════════════════════
@@ -1833,28 +1850,45 @@ Want me to show you some backlit patterns?`;
                 </div>
               </div>
 
-              {/* Image - full visible, not cut off */}
-              <div className="relative rounded-xl overflow-hidden mb-6 bg-stone-900">
+              {/* Hero Image - swappable */}
+              <div className="relative rounded-xl overflow-hidden mb-4 bg-stone-900">
                 <img
-                  src={specsImage.image}
-                  alt={specsImage.title}
+                  src={heroImage?.image || specsImage.image}
+                  alt={heroImage?.title || specsImage.title}
                   className="w-full h-auto object-contain"
                 />
-                {specsImage.isBacklit && (
+                {(heroImage || specsImage).isBacklit && (
                   <div className="absolute top-4 left-4 bg-amber-500 text-black text-xs font-medium px-3 py-1 rounded-full">
                     ✦ Backlit
                   </div>
                 )}
               </div>
 
+              {/* Pattern Gallery - click to swap hero */}
+              {patternGallery.length > 0 && (
+                <div className="grid grid-cols-4 gap-2 mb-6">
+                  {patternGallery.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => swapHeroImage(img)}
+                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                        heroImage?.id === img.id ? 'border-amber-500' : 'border-stone-700 hover:border-stone-500'
+                      }`}
+                    >
+                      <img src={img.image} alt={img.title} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* Title & Description */}
               <div className="mb-6">
-                <h2 className="text-2xl font-semibold text-stone-100 mb-1">{specsImage.title}</h2>
-                <p className="text-sm text-stone-400 mb-4">{specsImage.pattern} • {specsImage.sector}</p>
-                <p className="text-sm text-stone-300 leading-relaxed">{specsImage.description}</p>
+                <h2 className="text-2xl font-semibold text-stone-100 mb-1">{heroImage?.title || specsImage.title}</h2>
+                <p className="text-sm text-stone-400 mb-4">{specsImage.pattern} • {heroImage?.sector || specsImage.sector}</p>
+                <p className="text-sm text-stone-300 leading-relaxed">{heroImage?.description || specsImage.description}</p>
               </div>
 
-              {/* Specs Grid */}
+              {/* Specs Grid - Pattern-specific */}
               <div className="bg-stone-900/50 border border-stone-800 rounded-xl p-5 mb-6">
                 <h3 className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-4">Specifications</h3>
                 <div className="grid grid-cols-2 gap-4">
@@ -1866,13 +1900,21 @@ Want me to show you some backlit patterns?`;
                     <p className="text-xs text-stone-500 uppercase">Color</p>
                     <p className="text-sm text-stone-200">{specsImage.corianColor || specsImage.specs.color}</p>
                   </div>
+                  {specsImage.pattern === 'Great Wave' && (
+                    <div>
+                      <p className="text-xs text-stone-500 uppercase">Direction</p>
+                      <p className="text-sm text-stone-200">Vertical</p>
+                    </div>
+                  )}
                   <div>
                     <p className="text-xs text-stone-500 uppercase">Wall Dimension</p>
-                    <p className="text-sm text-stone-200">12' wide × 8' tall</p>
+                    <p className="text-sm text-stone-200">
+                      {specsImage.pattern === 'Great Wave' ? "12' high × 16' wide" : "12' wide × 8' tall"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-stone-500 uppercase">Lead Time</p>
-                    <p className="text-sm text-stone-200">4 Weeks</p>
+                    <p className="text-sm text-stone-200">{specsImage.specs.leadTime || '4 Weeks'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-stone-500 uppercase">System</p>
@@ -1887,7 +1929,7 @@ Want me to show you some backlit patterns?`;
                 </div>
               </div>
 
-              {/* Pricing */}
+              {/* Pricing - Pattern-specific */}
               <div className="bg-stone-900/50 border border-stone-800 rounded-xl p-5 mb-6">
                 <h3 className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-4">Pricing</h3>
                 <div className="space-y-2">
@@ -1903,13 +1945,17 @@ Want me to show you some backlit patterns?`;
                   )}
                   <div className="flex justify-between text-sm">
                     <span className="text-stone-400">Size</span>
-                    <span className="text-stone-200">96 SF</span>
+                    <span className="text-stone-200">
+                      {specsImage.pattern === 'Great Wave' ? '192 SF' : '96 SF'}
+                    </span>
                   </div>
                   <div className="border-t border-stone-700 pt-2 mt-2 flex justify-between">
                     <span className="text-stone-200 font-medium">Total</span>
                     <span className="text-xl font-semibold text-white">
-                      {specsImage.isBacklit ? '$6,720' : '$3,360'}
-                    </span>
+                      {specsImage.pattern === 'Great Wave'
+                        ? '$6,720'
+                        : specsImage.isBacklit ? '$6,720' : '$3,360'
+                      }
                   </div>
                 </div>
               </div>
