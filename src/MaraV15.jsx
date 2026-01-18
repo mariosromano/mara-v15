@@ -1167,12 +1167,13 @@ export default function MaraV15() {
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
-          max_tokens: 300,
+          max_tokens: 1024,
           system: MARA_SYSTEM_PROMPT,
           messages: apiMessages
         })
       });
       const data = await response.json();
+      console.log('Claude API response:', data);
       if (data.content?.[0]) return data.content[0].text;
       throw new Error(data.error?.message || 'API error');
     } catch (error) {
