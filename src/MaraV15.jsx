@@ -702,6 +702,36 @@ When user asks "backlight" → ONLY show from this list.
 - Flame: flame-1, flame-bed, flame-pink, flame-lobby
 - Desert Sunset: desert-sunset-1 through 4
 
+## BACKLIGHTING
+Backlighting is our signature capability. The carved surface becomes luminous.
+
+How It Works:
+- LED strips mount behind the panel
+- Light transmits through the thinner carved areas
+- Deeper cuts = more light transmission = brighter glow
+- Creates gradient effects impossible with other materials
+
+Technical Requirements:
+- Clearance: 3" minimum from back of panel to LED strip
+- LED type: 24V DC strips
+- Color options: Static white, tunable CCT (2700K-6500K), RGB
+- Power: ~4W per linear foot typical
+- Dimming: 0-10V, DALI, or DMX compatible
+
+MR Walls provides a complete backlighting package: All drawings, electrical sizing, drivers, and controls included.
+
+Carve Depth Effects:
+- 1/8" (shallow): Soft, diffused glow
+- 1/4" (medium): Defined pattern with even light
+- 3/8"+ (deep): Dramatic, bright transmission — LED placement matters more
+
+## INSTALLATION REFERENCES
+When user asks about backlight construction or installation, share these:
+- Backlight detail (3" spacing with acrylic stiffeners): https://res.cloudinary.com/dtlodxxio/image/upload/v1765759401/Backlight_Install_Wip_detail.jpe_xmaf6u.jpg
+- InterlockPanel puzzle installation video: https://res.cloudinary.com/dtlodxxio/video/upload/v1765772971/install_MR-LAX_720_-_puzzle_video_-_720_x_1280_m2ewcs.mp4
+
+These are reference materials to share when relevant, NOT part of the product gallery.
+
 Remember: Warm, brief, show max 2 images.`;
 
 const extractImageTags = (text) => {
