@@ -867,20 +867,18 @@ export default function MaraV15() {
 
   const generateImage = async (patternKey, sectorKey, application, backlightKey) => {
     setGenerateFlow('generating');
-    
     const model = LORA_MODELS[patternKey];
-    const sectorName = SECTORS[sectorKey].name;
-    
-    setMessages(m => [...m, {
-      role: 'assistant',
-      text: `Creating your ${model.name} pattern in a ${sectorName.toLowerCase()} ${application.toLowerCase()}... one moment.`,
-      isGenerating: true
-    }]);
-
+    const sectorName = SECTORS[sectorKey]?.name || sectorKey;
     const prompt = buildPrompt(patternKey, sectorKey, application, backlightKey);
+    
     console.log('Generating with prompt:', prompt);
+    
+    setMessages(m => [...m, 
+      { role: 'assistant', text: `Generating ${model.name} for ${sectorName} ${application}...`, isGenerateStep: true }
+    ]);
 
     try {
+      // Step 1: Submit to FAL queue
       const response = await fetch('https://queue.fal.run/fal-ai/flux-2/lora', {
         method: 'POST',
         headers: {
@@ -903,8 +901,37 @@ export default function MaraV15() {
         throw new Error(`API Error: ${response.status}`);
       }
 
-      const result = await response.json();
-      
+      const queueData = await response.json();
+      console.log('Queue response:', queueData);
+
+      // Step 2: Poll for result
+      const resultUrl = queueData.response_url;
+      let result = null;
+      let attempts = 0;
+      const maxAttempts = 120; // 2 minute timeout
+
+      while (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+        
+        const statusResponse = await fetch(resultUrl, {
+          headers: { 'Authorization': `Key ${FAL_API_KEY}` }
+        });
+        result = await statusResponse.json();
+        console.log('Poll attempt', attempts, result.status);
+
+        if (result.status === 'COMPLETED') {
+          break;
+        } else if (result.status === 'FAILED') {
+          throw new Error('Generation failed');
+        }
+        attempts++;
+      }
+
+      if (attempts >= maxAttempts) {
+        throw new Error('Generation timed out');
+      }
+
+      // Step 3: Process result
       if (result.images && result.images.length > 0) {
         const genImg = {
           url: result.images[0].url,
@@ -915,36 +942,22 @@ export default function MaraV15() {
         };
         setGeneratedImage(genImg);
         setShowGeneratedModal(true);
-        
-        // Update last message to show success
-        setMessages(m => {
-          const updated = [...m];
-          updated[updated.length - 1] = {
-            role: 'assistant',
-            text: `Done! Here's your ${model.name} in a ${sectorName.toLowerCase()} ${application.toLowerCase()}.`,
-            isGenerating: false
-          };
-          return updated;
-        });
-        
-        setGenerateFlow('complete');
+        setMessages(m => [...m,
+          { role: 'assistant', text: `Here's your ${model.name} visualization! This design is buildable — we can generate shop drawings and pricing.`, isGenerateStep: true }
+        ]);
       } else {
         throw new Error('No image returned');
       }
     } catch (error) {
       console.error('Generation error:', error);
-      setMessages(m => {
-        const updated = [...m];
-        updated[updated.length - 1] = {
-          role: 'assistant',
-          text: `Hmm, something went wrong. Want to try again?`,
-          isGenerating: false
-        };
-        return updated;
-      });
-      setGenerateFlow('pattern');
+      setMessages(m => [...m, 
+        { role: 'assistant', text: 'Hmm, something went wrong. Want to try again?', isGenerateStep: true }
+      ]);
+    } finally {
+      setGenerateFlow('complete');
     }
   };
+     
 
   const generateAnother = () => {
     setShowGeneratedModal(false);
