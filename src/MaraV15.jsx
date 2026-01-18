@@ -1164,11 +1164,45 @@ export default function MaraV15() {
     
     // Browse intent
     if (lower.includes('everything') || lower.includes('all image') || lower.includes('browse') || lower.includes('scroll') || lower.includes('gallery') || lower.includes('show me all') || lower.includes('see all')) {
-      setMessages(m => [...m, 
+      setMessages(m => [...m,
         { role: 'user', text: userMsg },
         { role: 'assistant', text: "Here's our full collection — tap any image to explore.", images: [] }
       ]);
       setShowGallery(true);
+      if (fromModal) closeModal();
+      return;
+    }
+
+    // Backlight / Installation intent
+    if (lower.includes('backlight') || lower.includes('install') || lower.includes('how do i') || lower.includes('led') || lower.includes('clearance')) {
+      setInput('');
+      const backlightResponse = `Great question! Here's what you need to know:
+
+**Technical Requirements:**
+• 3" minimum clearance behind panel for LED strips
+• 24V DC LED strips (we use high-quality strips)
+• Power: ~4W per linear foot
+• Dimming: 0-10V, DALI, or DMX compatible
+
+**We provide a complete backlight package:** drawings, electrical sizing, drivers, and controls — all included.
+
+**Carve depth affects the glow:**
+• 1/8" shallow = soft diffused glow
+• 1/4" medium = defined pattern
+• 3/8"+ deep = dramatic bright transmission
+
+**Here's our installation detail showing the 3" spacing with acrylic stiffeners:**
+https://res.cloudinary.com/dtlodxxio/image/upload/v1765759401/Backlight_Install_Wip_detail.jpe_xmaf6u.jpg
+
+**And our InterlockPanel puzzle installation video:**
+https://res.cloudinary.com/dtlodxxio/video/upload/v1765772971/install_MR-LAX_720_-_puzzle_video_-_720_x_1280_m2ewcs.mp4
+
+Want me to show you some backlit patterns?`;
+
+      setMessages(m => [...m,
+        { role: 'user', text: userMsg },
+        { role: 'assistant', text: backlightResponse }
+      ]);
       if (fromModal) closeModal();
       return;
     }
