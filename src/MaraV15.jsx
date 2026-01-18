@@ -904,24 +904,23 @@ export default function MaraV15() {
       const queueData = await response.json();
       console.log('Queue response:', queueData);
 
-      // Step 2: Poll for result
-      const resultUrl = queueData.response_url;
-      let result = null;
+     // Step 2: Poll for result
+      const requestId = queueData.request_id;
       let attempts = 0;
-      const maxAttempts = 120; // 2 minute timeout
+      const maxAttempts = 120;
 
       while (attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        const statusResponse = await fetch(resultUrl, {
+        const statusResponse = await fetch(`https://queue.fal.run/fal-ai/flux-lora/requests/${requestId}/status`, {
           headers: { 'Authorization': `Key ${FAL_API_KEY}` }
         });
-        result = await statusResponse.json();
-        console.log('Poll attempt', attempts, result.status);
+        const statusData = await statusResponse.json();
+        console.log('Poll attempt', attempts, statusData.status);
 
-        if (result.status === 'COMPLETED') {
+        if (statusData.status === 'COMPLETED') {
           break;
-        } else if (result.status === 'FAILED') {
+        } else if (statusData.status === 'FAILED') {
           throw new Error('Generation failed');
         }
         attempts++;
@@ -930,6 +929,12 @@ export default function MaraV15() {
       if (attempts >= maxAttempts) {
         throw new Error('Generation timed out');
       }
+
+      // Step 3: Fetch final result
+      const resultResponse = await fetch(`https://queue.fal.run/fal-ai/flux-lora/requests/${requestId}`, {
+        headers: { 'Authorization': `Key ${FAL_API_KEY}` }
+      });
+      const result = await resultResponse.json();
 
       // Step 3: Process result
       if (result.images && result.images.length > 0) {
