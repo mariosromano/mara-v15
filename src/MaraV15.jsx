@@ -1956,6 +1956,7 @@ Want me to show you some backlit patterns?`;
                         ? '$6,720'
                         : specsImage.isBacklit ? '$6,720' : '$3,360'
                       }
+                    </span>
                   </div>
                 </div>
               </div>
