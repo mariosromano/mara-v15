@@ -118,7 +118,8 @@ const CORIAN_COLORS = {
   "Neutral Concrete": { hex: "#b8b5b0" },
   "Artista Mist": { hex: "#c5c5c5" },
   "Laguna": { hex: "#1e3a5f" },
-  "Verdant": { hex: "#2d4a4a" }
+  "Verdant": { hex: "#2d4a4a" },
+  "Blue": { hex: "#2563eb" }
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -226,6 +227,22 @@ const IMAGE_CATALOG = [
     image: `${CLOUDINARY_BASE}/v1765939772/Lake_Backlight_Feature_Wall_with_Model_touch_bdzoxn.jpg`,
     specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 65, enhancement: 'Backlighting', system: 'InterlockPanel™' },
     description: 'Lake pattern — concentric ripples radiating outward like a stone dropped in still water. Backlit for ethereal glow.'
+  },
+
+  // SOLDIER
+  {
+    id: 'soldier-facade-blue',
+    pattern: 'Soldier',
+    patternFamily: 'Soldier',
+    title: 'Soldier Facade',
+    sector: 'Healthcare',
+    corianColor: 'Blue',
+    mood: ['bold', 'patriotic', 'architectural', 'modern'],
+    isBacklit: false,
+    keywords: ['soldier', 'exterior', 'facade', 'siding', 'veterans', 'hospital', 'VA', 'blue', 'outdoor', 'cladding'],
+    image: `${CLOUDINARY_BASE}/v1765771518/blue_-facade-_soldier-VA_-_Large_rc45wv.png`,
+    specs: { material: 'DuPont Corian®', color: 'Blue', maxPanel: '12" × 12"', leadTime: '4 Weeks', pricePerSF: 45, system: 'Fins' },
+    description: 'Soldier pattern — bold blue exterior facade panels. Perfect for Veterans Hospital and healthcare facilities.'
   },
 
   // SEATTLE
@@ -679,6 +696,7 @@ When user asks "backlight" → ONLY show from this list.
 ## OTHER IDS
 - Industrial Brick: industrial-brick-carbon, industrial-brick-laguna, etc.
 - Lake: lake-backlit-1
+- Soldier: soldier-facade-blue (exterior, facade, veterans hospital)
 - Great Wave: greatwave-1, greatwave-shower, etc.
 - Brick: brick-water-1 through 5
 - Flame: flame-1, flame-bed, flame-pink, flame-lobby
