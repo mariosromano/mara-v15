@@ -984,6 +984,25 @@ export default function MaraV15() {
     setShowGeneratedModal(false);
   };
 
+  const downloadGeneratedImage = async (url, pattern) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `MRWalls-${pattern}-${Date.now()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback: open in new tab
+      window.open(url, '_blank');
+    }
+  };
+
   // ═══════════════════════════════════════════════════════════════════════════════
   // CLAUDE API
   // ═══════════════════════════════════════════════════════════════════════════════
@@ -1433,15 +1452,12 @@ export default function MaraV15() {
             
             {/* Actions */}
             <div className="flex gap-3 justify-center">
-              <a
-                href={generatedImage.url}
-                download={`MRWalls-${generatedImage.pattern}-${Date.now()}.jpg`}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => downloadGeneratedImage(generatedImage.url, generatedImage.pattern)}
                 className="px-6 py-3 bg-stone-800 hover:bg-stone-700 border border-stone-600 rounded-xl text-sm font-medium transition-colors"
               >
                 Download
-              </a>
+              </button>
               <button
                 onClick={generateAnother}
                 className="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-black rounded-xl text-sm font-medium transition-colors"
@@ -1791,15 +1807,12 @@ export default function MaraV15() {
                     >
                       Custom Quote
                     </button>
-                    <a
-                      href={generatedImage.url}
-                      download={`MRWalls-${generatedImage.pattern}-${Date.now()}.jpg`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      onClick={() => downloadGeneratedImage(generatedImage.url, generatedImage.pattern)}
                       className="px-8 py-4 bg-stone-800 hover:bg-stone-700 border border-stone-600 text-white rounded-xl font-medium text-lg transition-colors text-center"
                     >
                       Download
-                    </a>
+                    </button>
                   </div>
 
                   {/* Generate Another */}
