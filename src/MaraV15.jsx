@@ -794,10 +794,10 @@ export default function MaraV15() {
   };
 
   const handleImageClick = (img) => {
-    const family = getFamilyImages(img);
-    setSelectedImage(img);
-    setFamilyImages(family);
-    setSpecsImage(null);
+    // Go directly to product page
+    setSpecsImage(img);
+    setSelectedImage(null);
+    setFamilyImages([]);
   };
 
   const handleFamilyClick = (img) => {
@@ -812,6 +812,8 @@ export default function MaraV15() {
 
   const closeSpecs = () => {
     setSpecsImage(null);
+    setSelectedImage(null);
+    setFamilyImages([]);
   };
 
   // ═══════════════════════════════════════════════════════════════════════════════
@@ -1586,42 +1588,143 @@ export default function MaraV15() {
         </div>
       )}
 
-      {/* SPECS MODAL */}
+      {/* PRODUCT PAGE MODAL */}
       {specsImage && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={closeSpecs}>
-          <div className="bg-stone-950 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto border border-stone-800" onClick={(e) => e.stopPropagation()}>
-            <div className="aspect-video relative bg-stone-900">
-              <img src={specsImage.image} alt={specsImage.title} className="w-full h-full object-cover" />
-              <button onClick={closeSpecs} className="absolute top-4 right-4 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70">✕</button>
+        <div className="fixed inset-0 bg-black/95 z-50 overflow-y-auto" onClick={closeSpecs}>
+          <div className="min-h-full flex flex-col">
+            {/* Header */}
+            <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-black/80 backdrop-blur-sm">
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowGallery(true); closeSpecs(); }}
+                className="flex items-center gap-2 px-3 py-2 bg-stone-800 hover:bg-stone-700 rounded-lg text-sm text-stone-300"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                Browse All
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); closeSpecs(); }}
+                className="w-10 h-10 bg-stone-800 hover:bg-stone-700 rounded-full flex items-center justify-center text-white"
+              >
+                ✕
+              </button>
             </div>
-            
-            <div className="p-6">
-              <h2 className="text-xl font-semibold text-stone-100 mb-1">{specsImage.title}</h2>
-              <p className="text-sm text-stone-400 mb-4">{specsImage.pattern} • {specsImage.sector}</p>
-              <p className="text-sm text-stone-300 mb-6">{specsImage.description}</p>
-              
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div><p className="text-xs text-stone-500 uppercase">Material</p><p className="text-sm text-stone-200">{specsImage.specs.material}</p></div>
-                <div><p className="text-xs text-stone-500 uppercase">Color</p><p className="text-sm text-stone-200">{specsImage.corianColor || specsImage.specs.color}</p></div>
-                <div><p className="text-xs text-stone-500 uppercase">Max Panel</p><p className="text-sm text-stone-200">{specsImage.specs.maxPanel || `${specsImage.specs.height} × ${specsImage.specs.width}`}</p></div>
-                <div><p className="text-xs text-stone-500 uppercase">Lead Time</p><p className="text-sm text-stone-200">{specsImage.specs.leadTime}</p></div>
-                <div><p className="text-xs text-stone-500 uppercase">System</p><p className="text-sm text-stone-200">{specsImage.specs.system}</p></div>
-                <div><p className="text-xs text-stone-500 uppercase">Price</p><p className="text-sm text-stone-200">${specsImage.specs.pricePerSF}/SF</p></div>
-                {specsImage.specs.enhancement && (
-                  <div className="col-span-2"><p className="text-xs text-stone-500 uppercase">Enhancement</p><p className="text-sm text-stone-200">{specsImage.specs.enhancement}</p></div>
+
+            {/* Content */}
+            <div className="flex-1 max-w-3xl mx-auto w-full px-4 pb-8" onClick={(e) => e.stopPropagation()}>
+              {/* Image - full visible, not cut off */}
+              <div className="relative rounded-xl overflow-hidden mb-6 bg-stone-900">
+                <img
+                  src={specsImage.image}
+                  alt={specsImage.title}
+                  className="w-full h-auto object-contain"
+                />
+                {specsImage.isBacklit && (
+                  <div className="absolute top-4 left-4 bg-amber-500 text-black text-xs font-medium px-3 py-1 rounded-full">
+                    ✦ Backlit
+                  </div>
                 )}
               </div>
-              
-              <div className="flex gap-3">
-                <button className="flex-1 py-3 bg-stone-800 hover:bg-stone-700 rounded-xl font-medium text-sm border border-stone-700">Download Specs</button>
-                <button className="flex-1 py-3 bg-stone-100 text-stone-900 hover:bg-white rounded-xl font-medium text-sm">Request Quote</button>
+
+              {/* Title & Description */}
+              <div className="mb-6">
+                <h2 className="text-2xl font-semibold text-stone-100 mb-1">{specsImage.title}</h2>
+                <p className="text-sm text-stone-400 mb-4">{specsImage.pattern} • {specsImage.sector}</p>
+                <p className="text-sm text-stone-300 leading-relaxed">{specsImage.description}</p>
               </div>
-              
-              {specsImage.shopDrawing && (
-                <a href={specsImage.shopDrawing} target="_blank" rel="noopener noreferrer" className="block mt-4 text-center text-sm text-stone-400 hover:text-stone-200 underline">View Shop Drawing →</a>
+
+              {/* Specs Grid */}
+              <div className="bg-stone-900/50 border border-stone-800 rounded-xl p-5 mb-6">
+                <h3 className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-4">Specifications</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-stone-500 uppercase">Material</p>
+                    <p className="text-sm text-stone-200">{specsImage.specs.material}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-stone-500 uppercase">Color</p>
+                    <p className="text-sm text-stone-200">{specsImage.corianColor || specsImage.specs.color}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-stone-500 uppercase">Wall Dimension</p>
+                    <p className="text-sm text-stone-200">12' wide × 8' tall</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-stone-500 uppercase">Lead Time</p>
+                    <p className="text-sm text-stone-200">4 Weeks</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-stone-500 uppercase">System</p>
+                    <p className="text-sm text-stone-200">{specsImage.specs.system}</p>
+                  </div>
+                  {specsImage.specs.enhancement && (
+                    <div>
+                      <p className="text-xs text-stone-500 uppercase">Enhancement</p>
+                      <p className="text-sm text-stone-200">{specsImage.specs.enhancement}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Pricing */}
+              <div className="bg-stone-900/50 border border-stone-800 rounded-xl p-5 mb-6">
+                <h3 className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-4">Pricing</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-stone-400">Panel</span>
+                    <span className="text-stone-200">$35/SF</span>
+                  </div>
+                  {specsImage.isBacklit && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-stone-400">Backlighting</span>
+                      <span className="text-stone-200">+$35/SF</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-stone-400">Size</span>
+                    <span className="text-stone-200">96 SF</span>
+                  </div>
+                  <div className="border-t border-stone-700 pt-2 mt-2 flex justify-between">
+                    <span className="text-stone-200 font-medium">Total</span>
+                    <span className="text-xl font-semibold text-white">
+                      {specsImage.isBacklit ? '$6,720' : '$3,360'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Backlight Includes Section */}
+              {specsImage.isBacklit && (
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-5 mb-6">
+                  <h3 className="text-xs font-medium text-amber-400 uppercase tracking-wider mb-3">Backlight Package Includes</h3>
+                  <p className="text-sm text-stone-300 leading-relaxed">
+                    Backlighting materials, shop drawings, custom lighting diagram, power supplies. Turnkey backlight system with remote.
+                  </p>
+                </div>
               )}
-              
-              <button onClick={closeSpecs} className="mt-4 w-full py-2 text-sm text-stone-500 hover:text-stone-300">← Back to related images</button>
+
+              {/* Shop Drawing Link */}
+              {specsImage.shopDrawing && (
+                <a
+                  href={specsImage.shopDrawing}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block mb-6 text-center text-sm text-stone-400 hover:text-stone-200 underline underline-offset-4"
+                >
+                  View Shop Drawing →
+                </a>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <button className="flex-1 py-4 bg-stone-800 hover:bg-stone-700 rounded-xl font-medium text-sm border border-stone-700 transition-colors">
+                  Download Spec
+                </button>
+                <button className="flex-1 py-4 bg-stone-100 text-stone-900 hover:bg-white rounded-xl font-medium text-sm transition-colors">
+                  Request Custom Size
+                </button>
+              </div>
             </div>
           </div>
         </div>
