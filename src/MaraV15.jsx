@@ -1495,24 +1495,25 @@ Want me to show you some backlit patterns?`;
 
               {/* Embedded media (images/videos) */}
               {msg.media && msg.media.length > 0 && (
-                <div className={`space-y-3 ${msg.text ? 'mt-3' : ''}`}>
+                <div className={`grid grid-cols-2 gap-3 ${msg.text ? 'mt-3' : ''}`}>
                   {msg.media.map((item, j) => (
-                    <div key={j} className="rounded-xl overflow-hidden border border-stone-700">
+                    <div key={j} className="relative aspect-[4/3] rounded-xl overflow-hidden border border-stone-700">
                       {item.type === 'image' && (
-                        <a href={item.url} target="_blank" rel="noopener noreferrer">
-                          <img src={item.url} alt={item.caption || 'Reference image'} className="w-full h-auto" />
+                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+                          <img src={item.url} alt={item.caption || 'Reference image'} className="w-full h-full object-cover" />
                         </a>
                       )}
                       {item.type === 'video' && (
                         <video
                           src={item.url}
                           controls
-                          className="w-full h-auto"
-                          poster=""
+                          className="w-full h-full object-cover"
                         />
                       )}
                       {item.caption && (
-                        <p className="text-xs text-stone-400 p-2 bg-stone-900">{item.caption}</p>
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2">
+                          <p className="text-xs text-stone-300">{item.caption}</p>
+                        </div>
                       )}
                     </div>
                   ))}
