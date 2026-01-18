@@ -727,14 +727,21 @@ Carve Depth Effects:
 - 3/8"+ (deep): Dramatic, bright transmission — LED placement matters more
 
 ## INSTALLATION REFERENCES
-When user asks about backlight construction or installation, share these URLs as markdown links:
-- [Backlight installation detail](https://res.cloudinary.com/dtlodxxio/image/upload/v1765759401/Backlight_Install_Wip_detail.jpe_xmaf6u.jpg) - shows 3" spacing with acrylic stiffeners
-- [InterlockPanel installation video](https://res.cloudinary.com/dtlodxxio/video/upload/v1765772971/install_MR-LAX_720_-_puzzle_video_-_720_x_1280_m2ewcs.mp4) - puzzle panel system
+When user asks about backlight, "how do I backlight", installation, or construction:
 
-Share these as clickable links when relevant. Example response:
-"For backlighting, you need 3" clearance behind the panel. Here's our [installation detail](URL) showing the setup."
+MUST include:
+1. Technical info: 3" clearance, 24V DC LEDs, complete package included
+2. Installation detail URL: https://res.cloudinary.com/dtlodxxio/image/upload/v1765759401/Backlight_Install_Wip_detail.jpe_xmaf6u.jpg
+3. Install video URL: https://res.cloudinary.com/dtlodxxio/video/upload/v1765772971/install_MR-LAX_720_-_puzzle_video_-_720_x_1280_m2ewcs.mp4
 
-Remember: Warm, helpful. Share technical details and links when asked about installation or backlighting.`;
+Example response:
+"You'll need 3" clearance behind the panel for LEDs. We use 24V DC strips and provide everything — drawings, drivers, controls.
+
+Installation detail: https://res.cloudinary.com/dtlodxxio/image/upload/v1765759401/Backlight_Install_Wip_detail.jpe_xmaf6u.jpg
+
+Install video: https://res.cloudinary.com/dtlodxxio/video/upload/v1765772971/install_MR-LAX_720_-_puzzle_video_-_720_x_1280_m2ewcs.mp4"
+
+Share the full URLs so users can click them.`;
 
 const extractImageTags = (text) => {
   const matches = text.match(/\[Image:\s*([^\]]+)\]/g) || [];
@@ -745,6 +752,30 @@ const extractImageTags = (text) => {
 };
 
 const cleanResponse = (text) => text.replace(/\[Image:\s*[^\]]+\]/g, '').trim();
+
+// Helper to render text with clickable URLs
+const renderTextWithLinks = (text) => {
+  if (!text) return null;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, i) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-amber-400 hover:text-amber-300 underline break-all"
+        >
+          {part.length > 50 ? part.slice(0, 50) + '...' : part}
+        </a>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+};
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
@@ -1418,8 +1449,8 @@ export default function MaraV15() {
                     ? 'bg-stone-700 text-stone-100' 
                     : 'bg-stone-900 border border-stone-800'
                 }`}>
-                  <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-                  
+                  <p className="text-sm whitespace-pre-wrap">{renderTextWithLinks(msg.text)}</p>
+
                   {/* Show generate buttons after generate step messages */}
                   {msg.isGenerateStep && i === messages.length - 1 && renderGenerateButtons()}
                   
