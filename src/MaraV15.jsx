@@ -1717,13 +1717,51 @@ export default function MaraV15() {
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3">
+              <div className="flex gap-3 mb-6">
                 <button className="flex-1 py-4 bg-stone-800 hover:bg-stone-700 rounded-xl font-medium text-sm border border-stone-700 transition-colors">
                   Download Spec
                 </button>
-                <button className="flex-1 py-4 bg-stone-100 text-stone-900 hover:bg-white rounded-xl font-medium text-sm transition-colors">
-                  Request Custom Size
+                <button
+                  onClick={() => alert('Added to cart! Cart feature coming soon.')}
+                  className="flex-1 py-4 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-medium text-sm transition-colors"
+                >
+                  Add to Cart
                 </button>
+              </div>
+
+              {/* Mara Assistant */}
+              <div className="bg-stone-900/50 border border-stone-800 rounded-xl p-4">
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center text-xs font-medium shrink-0">M</div>
+                  <div className="flex-1">
+                    <p className="text-sm text-stone-300">Have questions about {specsImage.pattern}? I can help with sizing, installation, lead times, or custom options.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <input
+                    ref={modalInputRef}
+                    placeholder="Ask Mara about this product..."
+                    className="flex-1 px-3 py-2 bg-stone-800 border border-stone-700 rounded-lg text-sm focus:outline-none focus:border-stone-500"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && e.target.value.trim()) {
+                        send(e.target.value, true);
+                        e.target.value = '';
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      if (modalInputRef.current?.value.trim()) {
+                        send(modalInputRef.current.value, true);
+                        modalInputRef.current.value = '';
+                      }
+                    }}
+                    className="px-4 py-2 bg-stone-100 text-stone-900 rounded-lg text-sm font-medium hover:bg-white"
+                  >
+                    Ask
+                  </button>
+                </div>
               </div>
             </div>
           </div>
