@@ -747,6 +747,8 @@ export default function MaraV15() {
   const [generatedImage, setGeneratedImage] = useState(null);
   const [showGeneratedModal, setShowGeneratedModal] = useState(false);
   const [showAIGenView, setShowAIGenView] = useState(false);
+  const [productMaraText, setProductMaraText] = useState('');
+  const [productMaraComplete, setProductMaraComplete] = useState(false);
 
   const messagesEndRef = useRef(null);
   const modalInputRef = useRef(null);
@@ -783,6 +785,32 @@ export default function MaraV15() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, generateFlow]);
+
+  // Product page Mara typing effect
+  useEffect(() => {
+    if (!specsImage) {
+      setProductMaraText('');
+      setProductMaraComplete(false);
+      return;
+    }
+
+    const fullText = "How can I help? If you need a custom size I can connect you to our designers.";
+    let i = 0;
+    setProductMaraText('');
+    setProductMaraComplete(false);
+
+    const timer = setInterval(() => {
+      if (i < fullText.length) {
+        setProductMaraText(fullText.slice(0, i + 1));
+        i++;
+      } else {
+        clearInterval(timer);
+        setProductMaraComplete(true);
+      }
+    }, 30);
+
+    return () => clearInterval(timer);
+  }, [specsImage]);
 
   const getGalleryPatterns = () => {
     const patterns = {};
@@ -1613,6 +1641,44 @@ export default function MaraV15() {
 
             {/* Content */}
             <div className="flex-1 max-w-3xl mx-auto w-full px-4 pb-8" onClick={(e) => e.stopPropagation()}>
+              {/* Mara Assistant - Top */}
+              <div className="bg-stone-900/50 border border-stone-800 rounded-xl p-4 mb-6">
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center text-xs font-medium shrink-0">M</div>
+                  <div className="flex-1">
+                    <p className="text-sm text-stone-300">
+                      {productMaraText}
+                      {!productMaraComplete && <span className="animate-pulse">|</span>}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <input
+                    ref={modalInputRef}
+                    placeholder="Ask Mara about this product..."
+                    className="flex-1 px-3 py-2 bg-stone-800 border border-stone-700 rounded-lg text-sm focus:outline-none focus:border-stone-500"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && e.target.value.trim()) {
+                        send(e.target.value, true);
+                        e.target.value = '';
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      if (modalInputRef.current?.value.trim()) {
+                        send(modalInputRef.current.value, true);
+                        modalInputRef.current.value = '';
+                      }
+                    }}
+                    className="px-4 py-2 bg-stone-100 text-stone-900 rounded-lg text-sm font-medium hover:bg-white"
+                  >
+                    Ask
+                  </button>
+                </div>
+              </div>
+
               {/* Image - full visible, not cut off */}
               <div className="relative rounded-xl overflow-hidden mb-6 bg-stone-900">
                 <img
@@ -1717,7 +1783,7 @@ export default function MaraV15() {
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3 mb-6">
+              <div className="flex gap-3">
                 <button className="flex-1 py-4 bg-stone-800 hover:bg-stone-700 rounded-xl font-medium text-sm border border-stone-700 transition-colors">
                   Download Spec
                 </button>
@@ -1727,41 +1793,6 @@ export default function MaraV15() {
                 >
                   Add to Cart
                 </button>
-              </div>
-
-              {/* Mara Assistant */}
-              <div className="bg-stone-900/50 border border-stone-800 rounded-xl p-4">
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center text-xs font-medium shrink-0">M</div>
-                  <div className="flex-1">
-                    <p className="text-sm text-stone-300">Have questions about {specsImage.pattern}? I can help with sizing, installation, lead times, or custom options.</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <input
-                    ref={modalInputRef}
-                    placeholder="Ask Mara about this product..."
-                    className="flex-1 px-3 py-2 bg-stone-800 border border-stone-700 rounded-lg text-sm focus:outline-none focus:border-stone-500"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && e.target.value.trim()) {
-                        send(e.target.value, true);
-                        e.target.value = '';
-                      }
-                    }}
-                  />
-                  <button
-                    onClick={() => {
-                      if (modalInputRef.current?.value.trim()) {
-                        send(modalInputRef.current.value, true);
-                        modalInputRef.current.value = '';
-                      }
-                    }}
-                    className="px-4 py-2 bg-stone-100 text-stone-900 rounded-lg text-sm font-medium hover:bg-white"
-                  >
-                    Ask
-                  </button>
-                </div>
               </div>
             </div>
           </div>
