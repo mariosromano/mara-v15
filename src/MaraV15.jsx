@@ -1472,7 +1472,7 @@ Want me to show you some backlit patterns?`;
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowAIGenView(true)}
+            onClick={startGenerateFlow}
             className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-lg text-sm text-white font-medium transition-all"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
