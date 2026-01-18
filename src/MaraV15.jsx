@@ -1212,7 +1212,7 @@ export default function MaraV15() {
           </div>
           <div>
             <h1 className="font-semibold text-stone-100">Mara</h1>
-            <p className="text-xs text-stone-500">MR Walls × Corian® Design</p>
+            <p className="text-xs text-stone-500">Mara × MR Walls</p>
           </div>
         </div>
         <button
