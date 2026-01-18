@@ -212,19 +212,20 @@ const IMAGE_CATALOG = [
     description: 'Industrial Brick in Verdant — brings nature in. The deep teal is surprisingly calming.'
   },
 
-  // BILLOW
+  // LAKE
   {
-    id: 'billow-render',
-    pattern: 'Billow',
-    title: 'Billow White',
-    sector: 'General',
+    id: 'lake-backlit-1',
+    pattern: 'Lake',
+    patternFamily: 'Lake',
+    title: 'Lake Backlit Feature Wall',
+    sector: 'Hospitality',
     corianColor: 'Glacier White',
-    mood: ['calm', 'organic', 'flowing'],
-    isBacklit: false,
-    keywords: ['billow', 'wave', 'organic', 'flowing', 'texture', 'white', 'calm'],
-    image: `${CLOUDINARY_BASE}/Billow_-_Render-001_copy_ujsmd4.png`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
-    description: 'Billow pattern — gentle horizontal waves like wind across water. Organic, calming.'
+    mood: ['calm', 'zen', 'glowing', 'dramatic'],
+    isBacklit: true,
+    keywords: ['lake', 'ripple', 'concentric', 'backlit', 'backlight', 'glow', 'zen', 'calm', 'meditation'],
+    image: `${CLOUDINARY_BASE}/v1765939772/Lake_Backlight_Feature_Wall_with_Model_touch_bdzoxn.jpg`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 65, enhancement: 'Backlighting', system: 'InterlockPanel™' },
+    description: 'Lake pattern — concentric ripples radiating outward like a stone dropped in still water. Backlit for ethereal glow.'
   },
 
   // SEATTLE
@@ -671,12 +672,13 @@ const MARA_SYSTEM_PROMPT = `You are Mara, the MR Walls design assistant. Brief, 
 - brick-water-3
 - flame-pink
 - desert-sunset-1
+- lake-backlit-1
 
 When user asks "backlight" → ONLY show from this list.
 
 ## OTHER IDS
 - Industrial Brick: industrial-brick-carbon, industrial-brick-laguna, etc.
-- Billow: billow-render
+- Lake: lake-backlit-1
 - Great Wave: greatwave-1, greatwave-shower, etc.
 - Brick: brick-water-1 through 5
 - Flame: flame-1, flame-bed, flame-pink, flame-lobby
@@ -1084,7 +1086,7 @@ export default function MaraV15() {
         responseText = responseText || `Here's what I found:`;
       } else {
         responseText = responseText || "What sector is this for — healthcare, hospitality, residential?";
-        responseImages = [IMAGE_CATALOG.find(i => i.id === 'buddha-1'), IMAGE_CATALOG.find(i => i.id === 'billow-render')];
+        responseImages = [IMAGE_CATALOG.find(i => i.id === 'buddha-1'), IMAGE_CATALOG.find(i => i.id === 'lake-backlit-1')];
       }
     }
 
