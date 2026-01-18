@@ -726,7 +726,8 @@ export default function MaraV15() {
   const [genBacklight, setGenBacklight] = useState(null);
   const [generatedImage, setGeneratedImage] = useState(null);
   const [showGeneratedModal, setShowGeneratedModal] = useState(false);
-  
+  const [showAIGenView, setShowAIGenView] = useState(false);
+
   const messagesEndRef = useRef(null);
   const modalInputRef = useRef(null);
 
@@ -1203,7 +1204,65 @@ export default function MaraV15() {
 
   return (
     <div className="h-screen bg-stone-950 text-stone-100 flex flex-col" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-      
+
+      {/* Smoky Animation Styles */}
+      <style>{`
+        @keyframes smokeIn {
+          0% {
+            opacity: 0;
+            backdrop-filter: blur(0px);
+            transform: scale(1.02);
+          }
+          100% {
+            opacity: 1;
+            backdrop-filter: blur(8px);
+            transform: scale(1);
+          }
+        }
+        @keyframes smokeOut {
+          0% {
+            opacity: 1;
+            backdrop-filter: blur(8px);
+          }
+          100% {
+            opacity: 0;
+            backdrop-filter: blur(0px);
+          }
+        }
+        @keyframes fadeSlideUp {
+          0% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes shimmer {
+          0% {
+            background-position: -200% 0;
+          }
+          100% {
+            background-position: 200% 0;
+          }
+        }
+        .smoke-overlay {
+          animation: smokeIn 0.5s ease-out forwards;
+        }
+        .smoke-content {
+          animation: fadeSlideUp 0.6s ease-out 0.1s forwards;
+          opacity: 0;
+        }
+        .pattern-card {
+          animation: fadeSlideUp 0.5s ease-out forwards;
+          opacity: 0;
+        }
+        .pattern-card:nth-child(1) { animation-delay: 0.2s; }
+        .pattern-card:nth-child(2) { animation-delay: 0.3s; }
+        .pattern-card:nth-child(3) { animation-delay: 0.4s; }
+      `}</style>
+
       {/* Header */}
       <header className="p-4 border-b border-stone-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -1215,15 +1274,26 @@ export default function MaraV15() {
             <p className="text-xs text-stone-500">Mara × MR Walls</p>
           </div>
         </div>
-        <button
-          onClick={() => setShowGallery(true)}
-          className="flex items-center gap-2 px-3 py-2 bg-stone-900 hover:bg-stone-800 rounded-lg border border-stone-700 text-sm text-stone-300 transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-          </svg>
-          Browse All
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowAIGenView(true)}
+            className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-lg text-sm text-white font-medium transition-all"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+            AI Generate
+          </button>
+          <button
+            onClick={() => setShowGallery(true)}
+            className="flex items-center gap-2 px-3 py-2 bg-stone-900 hover:bg-stone-800 rounded-lg border border-stone-700 text-sm text-stone-300 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+            Browse All
+          </button>
+        </div>
       </header>
 
       {/* Messages */}
@@ -1560,6 +1630,194 @@ export default function MaraV15() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* AI GENERATE VIEW */}
+      {showAIGenView && (
+        <div className="fixed inset-0 bg-stone-950/98 z-50 smoke-overlay">
+          {/* Background gradient effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-900/10 via-transparent to-stone-900/50" />
+
+          <div className="relative h-full flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-stone-800/50">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                <span className="text-sm text-stone-400">AI Generate</span>
+              </div>
+              <button
+                onClick={() => {
+                  setShowAIGenView(false);
+                  setGeneratedImage(null);
+                  setGenerateFlow(null);
+                }}
+                className="w-10 h-10 bg-stone-800/50 hover:bg-stone-700 rounded-full flex items-center justify-center text-white transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 flex flex-col items-center justify-center p-6 overflow-y-auto">
+              {/* Show pattern selection when no generation in progress */}
+              {!generatedImage && generateFlow !== 'generating' && (
+                <div className="smoke-content max-w-3xl w-full">
+                  {/* Headline */}
+                  <div className="text-center mb-12">
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                      Push a button. Make a wall.
+                    </h2>
+                    <p className="text-lg text-stone-400">
+                      Select a pattern to generate a custom visualization
+                    </p>
+                  </div>
+
+                  {/* Pattern Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {Object.entries(LORA_MODELS).map(([key, model], index) => (
+                      <button
+                        key={key}
+                        onClick={() => {
+                          setGenPattern(key);
+                          // Use default sector/application for quick generation
+                          const defaultSector = 'hospitality';
+                          const defaultApp = 'Hotel Lobby';
+                          const defaultBacklight = model.hasBacklight ? 'warm' : null;
+                          setGenSector(defaultSector);
+                          setGenApplication(defaultApp);
+                          setGenBacklight(defaultBacklight);
+                          generateImage(key, defaultSector, defaultApp, defaultBacklight);
+                        }}
+                        className="pattern-card group relative bg-stone-900/50 border border-stone-700 hover:border-amber-500/50 rounded-2xl p-6 text-left transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-amber-500/10"
+                        style={{ animationDelay: `${0.2 + index * 0.1}s` }}
+                      >
+                        {/* Pattern icon/preview area */}
+                        <div className="aspect-[4/3] bg-gradient-to-br from-stone-800 to-stone-900 rounded-xl mb-4 flex items-center justify-center overflow-hidden">
+                          <div className="text-6xl text-stone-700 group-hover:text-amber-500/30 transition-colors">
+                            {key === 'lake' && (
+                              <svg className="w-20 h-20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <circle cx="12" cy="12" r="3" />
+                                <circle cx="12" cy="12" r="6" />
+                                <circle cx="12" cy="12" r="9" />
+                              </svg>
+                            )}
+                            {key === 'flame' && (
+                              <svg className="w-20 h-20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path d="M12 2c0 4-4 6-4 10a4 4 0 108 0c0-4-4-6-4-10z" />
+                                <path d="M12 6c0 2-2 3-2 5a2 2 0 104 0c0-2-2-3-2-5z" />
+                              </svg>
+                            )}
+                            {key === 'fins' && (
+                              <svg className="w-20 h-20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path d="M4 4l8 8-8 8" />
+                                <path d="M12 4l8 8-8 8" />
+                              </svg>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Pattern info */}
+                        <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-amber-400 transition-colors">
+                          {model.name}
+                        </h3>
+                        <p className="text-sm text-stone-400 line-clamp-2">
+                          {model.description}
+                        </p>
+
+                        {/* Backlight badge */}
+                        {model.hasBacklight && (
+                          <div className="absolute top-4 right-4 px-2 py-1 bg-amber-500/20 rounded-full">
+                            <span className="text-xs text-amber-400">✦ Backlit</span>
+                          </div>
+                        )}
+
+                        {/* Hover glow effect */}
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Loading State */}
+              {generateFlow === 'generating' && !generatedImage && (
+                <div className="smoke-content text-center">
+                  <div className="relative w-24 h-24 mx-auto mb-6">
+                    <div className="absolute inset-0 rounded-full border-4 border-stone-700" />
+                    <div className="absolute inset-0 rounded-full border-4 border-amber-500 border-t-transparent animate-spin" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-2">Creating your wall...</h3>
+                  <p className="text-stone-400">
+                    Generating {genPattern ? LORA_MODELS[genPattern]?.name : 'pattern'} visualization
+                  </p>
+                </div>
+              )}
+
+              {/* Result View */}
+              {generatedImage && (
+                <div className="smoke-content max-w-4xl w-full">
+                  <div className="relative aspect-video rounded-2xl overflow-hidden mb-6 shadow-2xl">
+                    <img
+                      src={generatedImage.url}
+                      alt={`${generatedImage.pattern} visualization`}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* AI Generated Badge */}
+                    <div className="absolute top-4 left-4 bg-amber-500 text-black text-xs font-medium px-3 py-1 rounded-full">
+                      AI Generated
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="text-center mb-8">
+                    <h3 className="text-2xl font-semibold text-white mb-2">
+                      {generatedImage.pattern} • {generatedImage.application}
+                    </h3>
+                    {generatedImage.backlight && (
+                      <p className="text-stone-400">{generatedImage.backlight} backlight</p>
+                    )}
+                    <p className="text-sm text-stone-500 mt-3">
+                      This design is buildable — CNC files, shop drawings, and pricing available.
+                    </p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button
+                      onClick={() => alert('Custom Quote feature coming soon! Contact us at sales@mrwalls.com')}
+                      className="px-8 py-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white rounded-xl font-medium text-lg transition-all shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40"
+                    >
+                      Custom Quote
+                    </button>
+                    <a
+                      href={generatedImage.url}
+                      download={`MRWalls-${generatedImage.pattern}-${Date.now()}.jpg`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-8 py-4 bg-stone-800 hover:bg-stone-700 border border-stone-600 text-white rounded-xl font-medium text-lg transition-colors text-center"
+                    >
+                      Download
+                    </a>
+                  </div>
+
+                  {/* Generate Another */}
+                  <div className="text-center mt-8">
+                    <button
+                      onClick={() => {
+                        setGeneratedImage(null);
+                        setGenerateFlow(null);
+                        setGenPattern(null);
+                      }}
+                      className="text-stone-400 hover:text-white text-sm underline underline-offset-4 transition-colors"
+                    >
+                      ← Generate another pattern
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
