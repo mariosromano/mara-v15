@@ -1273,14 +1273,18 @@ export default function MaraV15() {
 
     // Get response from Claude
     const claudeResponse = await callClaude(userMsg, chatHistory);
+    console.log('Claude raw response:', claudeResponse);
     let responseText = claudeResponse ? cleanResponse(claudeResponse) : '';
+    console.log('Cleaned response:', responseText);
 
-    // Keep it brief - just first 2-3 sentences
+    // Keep it brief - just first 3-4 sentences for informational questions
     if (responseText) {
       const sentences = responseText.split(/[.!?]+/).filter(s => s.trim());
-      responseText = sentences.slice(0, 3).join('. ').trim();
+      const numSentences = isQuestion ? 4 : 3; // Allow more for questions
+      responseText = sentences.slice(0, numSentences).join('. ').trim();
       if (responseText && !responseText.endsWith('.') && !responseText.endsWith('!') && !responseText.endsWith('?')) responseText += '.';
     }
+    console.log('Final response:', responseText);
 
     // Follow-up questions to drive conversation
     const followUps = [
