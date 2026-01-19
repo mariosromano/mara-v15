@@ -860,7 +860,8 @@ export default function MaraV15() {
   const [patternGallery, setPatternGallery] = useState([]); // Related images for pattern
   const [showGallery, setShowGallery] = useState(false);
   const [showLanding, setShowLanding] = useState(true); // Show landing screen initially
-  const [landingResult, setLandingResult] = useState(null); // { image, text, allMatches, loading }
+  const [landingChat, setLandingChat] = useState([]); // Array of { role, text, image, allMatches }
+  const [landingLoading, setLandingLoading] = useState(false);
   
   // AI Generate state
   const [generateFlow, setGenerateFlow] = useState(null); // null, 'pattern', 'sector', 'application', 'backlight', 'generating'
@@ -1223,7 +1224,10 @@ export default function MaraV15() {
     }
 
     setInput('');
-    setLandingResult({ loading: true });
+
+    // Add user message to chat
+    setLandingChat(prev => [...prev, { role: 'user', text: userMsg }]);
+    setLandingLoading(true);
 
     // Check if this is an informational question (not a design query)
     const isQuestion = lower.includes('what') || lower.includes('who') || lower.includes('how') || lower.includes('why') || lower.includes('tell me') || lower.includes('?');
@@ -1231,8 +1235,14 @@ export default function MaraV15() {
     // Search for matching images
     const matchedImages = searchImages(userMsg);
 
+    // Build history for Claude from landing chat
+    const chatHistory = landingChat.map(msg => ({
+      role: msg.role,
+      content: msg.text
+    }));
+
     // Get response from Claude
-    const claudeResponse = await callClaude(userMsg, []);
+    const claudeResponse = await callClaude(userMsg, chatHistory);
     let responseText = claudeResponse ? cleanResponse(claudeResponse) : '';
 
     // Keep it brief - just first 2-3 sentences
@@ -1253,12 +1263,12 @@ export default function MaraV15() {
 
     // For informational questions without matching images, show text-only response
     if (isQuestion && matchedImages.length === 0) {
-      setLandingResult({
-        image: null,
+      setLandingChat(prev => [...prev, {
+        role: 'assistant',
         text: responseText || "MR Walls creates carved DuPont Corian wall surfaces. We're the exclusive North American partner with DuPont for architectural walls. What are you designing?",
-        allMatches: [],
-        loading: false
-      });
+        image: null,
+        allMatches: []
+      }]);
     } else {
       // Design query - show image with brief response + follow-up question
       const images = matchedImages.length > 0 ? matchedImages : [IMAGE_CATALOG.find(i => i.id === 'buddha-1')];
@@ -1272,13 +1282,15 @@ export default function MaraV15() {
         text = text + ' ' + followUp;
       }
 
-      setLandingResult({
-        image: img,
+      setLandingChat(prev => [...prev, {
+        role: 'assistant',
         text: text,
-        allMatches: images,
-        loading: false
-      });
+        image: img,
+        allMatches: images
+      }]);
     }
+
+    setLandingLoading(false);
   };
 
   const send = async (text, fromModal = false) => {
@@ -1590,29 +1602,29 @@ Want me to show you some backlit patterns?`;
           </div>
 
           {/* Center Content */}
-          <div className={`flex-1 flex flex-col items-center px-6 ${landingResult ? 'pt-8' : 'justify-center -mt-16'}`}>
+          <div className={`flex-1 flex flex-col items-center px-6 ${landingChat.length > 0 ? 'pt-6' : 'justify-center -mt-16'}`}>
             {/* Mara Avatar */}
-            <div className={`bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 ${landingResult ? 'w-14 h-14 mb-4' : 'w-20 h-20 mb-6'}`}>
-              <span className={`font-semibold text-stone-300 ${landingResult ? 'text-xl' : 'text-3xl'}`}>M</span>
+            <div className={`bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 ${landingChat.length > 0 ? 'w-12 h-12 mb-3' : 'w-20 h-20 mb-6'}`}>
+              <span className={`font-semibold text-stone-300 ${landingChat.length > 0 ? 'text-lg' : 'text-3xl'}`}>M</span>
             </div>
 
-            {/* Tagline - hide when result shown */}
-            {!landingResult && (
+            {/* Tagline - hide when chat started */}
+            {landingChat.length === 0 && (
               <p className="text-stone-400 text-center mb-10 text-lg">
                 The only AI that shows you what you can actually build.
               </p>
             )}
 
             {/* Prompt */}
-            <h2 className={`font-medium text-stone-100 transition-all duration-300 ${landingResult ? 'text-lg mb-4' : 'text-2xl mb-6'}`}>
+            <h2 className={`font-medium text-stone-100 transition-all duration-300 ${landingChat.length > 0 ? 'text-base mb-3' : 'text-2xl mb-6'}`}>
               What are you designing?
             </h2>
 
             {/* Input Field */}
-            <div className="w-full max-w-md mb-6">
+            <div className="w-full max-w-md mb-4">
               <form onSubmit={(e) => {
                 e.preventDefault();
-                if (input.trim()) {
+                if (input.trim() && !landingLoading) {
                   handleLandingQuery(input);
                 }
               }}>
@@ -1620,105 +1632,112 @@ Want me to show you some backlit patterns?`;
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="e.g., spa lobby, hospital corridor, hotel feature wall..."
-                  className="w-full px-5 py-4 bg-stone-900 border border-stone-700 rounded-2xl text-stone-100 placeholder-stone-500 focus:outline-none focus:border-stone-500 focus:ring-1 focus:ring-stone-500 text-center"
+                  placeholder={landingChat.length > 0 ? "Continue the conversation..." : "e.g., spa lobby, hospital corridor, hotel feature wall..."}
+                  disabled={landingLoading}
+                  className="w-full px-5 py-4 bg-stone-900 border border-stone-700 rounded-2xl text-stone-100 placeholder-stone-500 focus:outline-none focus:border-stone-500 focus:ring-1 focus:ring-stone-500 text-center disabled:opacity-50"
                 />
               </form>
             </div>
 
-            {/* Loading State */}
-            {landingResult?.loading && (
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-2 h-2 bg-stone-500 rounded-full animate-bounce" />
-                <div className="w-2 h-2 bg-stone-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-stone-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-            )}
+            {/* Chat Messages */}
+            {landingChat.length > 0 && (
+              <div className="w-full max-w-md space-y-4 mb-6">
+                {landingChat.map((msg, i) => (
+                  <div key={i} className={`animate-fadeIn ${msg.role === 'user' ? 'flex justify-end' : ''}`}>
+                    {msg.role === 'user' ? (
+                      <div className="bg-stone-700 rounded-2xl px-4 py-2 max-w-[80%]">
+                        <p className="text-sm text-stone-100">{msg.text}</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {/* Image if present */}
+                        {msg.image && (
+                          <button
+                            onClick={() => handleImageClick(msg.image)}
+                            className="w-full aspect-[16/10] rounded-xl overflow-hidden border border-stone-800 hover:border-stone-600 transition-all relative"
+                          >
+                            <img
+                              src={msg.image.image}
+                              alt={msg.image.title}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                            <div className="absolute bottom-0 left-0 right-0 p-4">
+                              <p className="text-lg font-medium text-white">{msg.image.title}</p>
+                              <p className="text-sm text-stone-300">{msg.image.pattern} • {msg.image.sector}</p>
+                            </div>
+                          </button>
+                        )}
 
-            {/* Result - Text only (for informational questions) */}
-            {landingResult && !landingResult.loading && !landingResult.image && landingResult.text && (
-              <div className="w-full max-w-md animate-fadeIn mb-8">
-                <div className="bg-stone-900 border border-stone-800 rounded-2xl p-5">
-                  <p className="text-stone-300 text-center text-sm leading-relaxed">
-                    {landingResult.text}
-                  </p>
-                </div>
-              </div>
-            )}
+                        {/* Response Text */}
+                        <div className="bg-stone-900 border border-stone-800 rounded-2xl px-4 py-3">
+                          <p className="text-sm text-stone-300 leading-relaxed">{msg.text}</p>
+                        </div>
 
-            {/* Result - Image + Text + Buttons */}
-            {landingResult && !landingResult.loading && landingResult.image && (
-              <div className="w-full max-w-md animate-fadeIn">
-                {/* Image */}
-                <button
-                  onClick={() => handleImageClick(landingResult.image)}
-                  className="w-full aspect-[16/10] rounded-xl overflow-hidden border border-stone-800 hover:border-stone-600 transition-all mb-4 relative"
-                >
-                  <img
-                    src={landingResult.image.image}
-                    alt={landingResult.image.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <p className="text-lg font-medium text-white">{landingResult.image.title}</p>
-                    <p className="text-sm text-stone-300">{landingResult.image.pattern} • {landingResult.image.sector}</p>
+                        {/* Action Buttons - only on last assistant message with image */}
+                        {msg.image && i === landingChat.length - 1 && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                const img = msg.image;
+                                const patternKey = Object.keys(LORA_MODELS).find(k => LORA_MODELS[k].name === img.pattern) || 'lake';
+                                setGenPattern(patternKey);
+                                setShowLanding(false);
+                                setGenerateFlow('sector');
+                                setMessages([{
+                                  role: 'assistant',
+                                  text: `Let's generate ${img.pattern} for your space. What sector?`,
+                                  isGenerateStep: true
+                                }]);
+                              }}
+                              className="flex-1 py-2.5 px-3 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-xl text-sm text-white font-medium transition-all"
+                            >
+                              Generate for My Space
+                            </button>
+                            <button
+                              onClick={() => {
+                                const moreImages = (msg.allMatches || []).slice(1, 5);
+                                if (moreImages.length > 0) {
+                                  setLandingChat(prev => [...prev, {
+                                    role: 'assistant',
+                                    text: `Here's another option. ${moreImages[0]?.pattern} in a ${moreImages[0]?.sector?.toLowerCase()} setting.`,
+                                    image: moreImages[0],
+                                    allMatches: moreImages.slice(1)
+                                  }]);
+                                } else {
+                                  setShowGallery(true);
+                                }
+                              }}
+                              className="py-2.5 px-3 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-xl text-sm text-stone-300 transition-colors"
+                            >
+                              Show More
+                            </button>
+                            <button
+                              onClick={() => handleImageClick(msg.image)}
+                              className="py-2.5 px-3 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-xl text-sm text-stone-300 transition-colors"
+                            >
+                              View Specs
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                </button>
+                ))}
 
-                {/* Mara Response Text */}
-                <p className="text-stone-300 text-center mb-4 text-sm leading-relaxed">
-                  {landingResult.text}
-                </p>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2 mb-8">
-                  <button
-                    onClick={() => {
-                      const img = landingResult.image;
-                      const patternKey = Object.keys(LORA_MODELS).find(k => LORA_MODELS[k].name === img.pattern) || 'lake';
-                      setGenPattern(patternKey);
-                      setShowLanding(false);
-                      setGenerateFlow('sector');
-                      setMessages([{
-                        role: 'assistant',
-                        text: `Let's generate ${img.pattern} for your space. What sector?`,
-                        isGenerateStep: true
-                      }]);
-                    }}
-                    className="flex-1 py-3 px-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-xl text-sm text-white font-medium transition-all"
-                  >
-                    Generate for My Space
-                  </button>
-                  <button
-                    onClick={() => {
-                      const moreImages = (landingResult.allMatches || []).slice(1, 5);
-                      if (moreImages.length > 0) {
-                        setLandingResult({
-                          ...landingResult,
-                          image: moreImages[0],
-                          allMatches: [...moreImages.slice(1), landingResult.image, ...landingResult.allMatches.slice(5)]
-                        });
-                      } else {
-                        setShowGallery(true);
-                      }
-                    }}
-                    className="py-3 px-4 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-xl text-sm text-stone-300 transition-colors"
-                  >
-                    Show More
-                  </button>
-                  <button
-                    onClick={() => handleImageClick(landingResult.image)}
-                    className="py-3 px-4 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-xl text-sm text-stone-300 transition-colors"
-                  >
-                    View Specs
-                  </button>
-                </div>
+                {/* Loading State */}
+                {landingLoading && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-stone-500 rounded-full animate-bounce" />
+                    <div className="w-2 h-2 bg-stone-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-2 h-2 bg-stone-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Divider - only show when no result */}
-            {!landingResult && (
+            {/* Divider - only show when no chat */}
+            {landingChat.length === 0 && (
               <>
                 <div className="flex items-center gap-4 mb-8 w-full max-w-md">
                   <div className="flex-1 h-px bg-stone-800"></div>
