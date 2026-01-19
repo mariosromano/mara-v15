@@ -688,6 +688,13 @@ You are:
 - Conversational, not robotic
 - Helpful to people at any stage — early exploration to ready-to-spec
 
+## RESPONSE RULES
+- Never use markdown formatting like ** or * in responses. Write in plain text only.
+- MAX 50 words per response
+- Show max 2 images
+- ONE question per response
+- Be warm and brief, not essay-like
+
 ## MR WALLS TEAM
 - Mario Romano — President and Founder
 - Carlo and Kamila — VP Leadership
@@ -1985,7 +1992,16 @@ Want me to show you some backlit patterns?`;
 
               {/* Action Buttons */}
               <div className="flex gap-3">
-                <button className="flex-1 py-4 bg-stone-800 hover:bg-stone-700 rounded-xl font-medium text-sm border border-stone-700 transition-colors">
+                <button
+                  onClick={() => {
+                    if (specsImage?.pattern === 'Great Wave') {
+                      downloadGeneratedImage('https://res.cloudinary.com/dtlodxxio/image/upload/v1768776807/Great-Wave-Shop-Drawing_ffdoys.png', 'Great-Wave-Shop-Drawing');
+                    } else {
+                      alert('Shop drawing coming soon for this pattern!');
+                    }
+                  }}
+                  className="flex-1 py-4 bg-stone-800 hover:bg-stone-700 rounded-xl font-medium text-sm border border-stone-700 transition-colors"
+                >
                   Download Spec
                 </button>
                 <button
