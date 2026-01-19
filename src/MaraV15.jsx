@@ -1280,18 +1280,21 @@ Want me to show you some backlit patterns?`;
     
     if (!claudeResponse || responseImages.length === 0) {
       responseImages = searchImages(userMsg);
-      if (responseImages.length > 0) {
-        responseText = responseText || `Here's what I found:`;
-      } else {
-        responseText = responseText || "What sector is this for — healthcare, hospitality, residential?";
-        responseImages = [IMAGE_CATALOG.find(i => i.id === 'buddha-1'), IMAGE_CATALOG.find(i => i.id === 'lake-backlit-1')];
+      if (responseImages.length === 0) {
+        responseImages = [IMAGE_CATALOG.find(i => i.id === 'buddha-1')];
       }
     }
 
+    // Return ONE image with action buttons for recommendations
+    const recommendedImage = responseImages[0];
+    const briefText = responseText || `This could work beautifully for your space.`;
+
     setMessages(m => [...m, {
       role: 'assistant',
-      text: responseText,
-      images: responseImages.slice(0, 2)
+      text: briefText,
+      images: [recommendedImage],
+      isRecommendation: true,
+      allMatches: responseImages // Store all matches for "Show More"
     }]);
     
     setLoading(false);
@@ -1626,21 +1629,67 @@ Want me to show you some backlit patterns?`;
               )}
               
               {msg.images && msg.images.length > 0 && (
-                <div className={`grid grid-cols-2 gap-3 ${msg.text ? 'mt-3' : ''}`}>
-                  {msg.images.map((img, j) => (
-                    <button
-                      key={j}
-                      onClick={() => handleImageClick(img)}
-                      className="relative aspect-[4/3] rounded-xl overflow-hidden border border-stone-800 hover:border-stone-600 transition-all text-left"
-                    >
-                      <img src={img.image} alt={img.title} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-3">
-                        <p className="text-sm font-medium text-white truncate">{img.title}</p>
-                        <p className="text-xs text-stone-400">{img.pattern} • {img.sector}</p>
-                      </div>
-                    </button>
-                  ))}
+                <div className={`${msg.text ? 'mt-3' : ''}`}>
+                  <div className={msg.isRecommendation ? '' : 'grid grid-cols-2 gap-3'}>
+                    {msg.images.map((img, j) => (
+                      <button
+                        key={j}
+                        onClick={() => handleImageClick(img)}
+                        className={`relative rounded-xl overflow-hidden border border-stone-800 hover:border-stone-600 transition-all text-left ${msg.isRecommendation ? 'w-full aspect-[16/10]' : 'aspect-[4/3]'}`}
+                      >
+                        <img src={img.image} alt={img.title} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 p-3">
+                          <p className="text-sm font-medium text-white truncate">{img.title}</p>
+                          <p className="text-xs text-stone-400">{img.pattern} • {img.sector}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Action buttons for recommendations */}
+                  {msg.isRecommendation && i === messages.length - 1 && (
+                    <div className="flex gap-2 mt-3">
+                      <button
+                        onClick={() => {
+                          const img = msg.images[0];
+                          setGenPattern(Object.keys(LORA_MODELS).find(k => LORA_MODELS[k].name === img.pattern) || 'lake');
+                          setGenerateFlow('sector');
+                          setMessages(m => [...m, {
+                            role: 'assistant',
+                            text: `Let's generate ${img.pattern} for your space. What sector?`,
+                            isGenerateStep: true
+                          }]);
+                        }}
+                        className="flex-1 py-2.5 px-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-lg text-sm text-white font-medium transition-all"
+                      >
+                        Generate for My Space
+                      </button>
+                      <button
+                        onClick={() => {
+                          const moreImages = (msg.allMatches || []).slice(1, 5);
+                          if (moreImages.length > 0) {
+                            setMessages(m => [...m, {
+                              role: 'assistant',
+                              text: 'Here are more options:',
+                              images: moreImages
+                            }]);
+                          } else {
+                            setShowGallery(true);
+                          }
+                        }}
+                        className="py-2.5 px-4 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-lg text-sm text-stone-300 transition-colors"
+                      >
+                        Show More
+                      </button>
+                      <button
+                        onClick={() => handleImageClick(msg.images[0])}
+                        className="py-2.5 px-4 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-lg text-sm text-stone-300 transition-colors"
+                      >
+                        View Specs
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
