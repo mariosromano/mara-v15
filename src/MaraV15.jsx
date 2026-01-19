@@ -1516,6 +1516,18 @@ Want me to show you some backlit patterns?`;
         </div>
       </header>
 
+      {/* Tagline & Language Indicator */}
+      <div className="px-4 py-3 text-center border-b border-stone-800/50">
+        <p className="text-sm text-stone-400 mb-1">The only AI that shows you what you can actually build.</p>
+        <p className="text-xs text-stone-500 flex items-center justify-center gap-1">
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" strokeWidth="1.5"/>
+            <path strokeWidth="1.5" d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+          </svg>
+          Chat in any language
+        </p>
+      </div>
+
       {/* Messages */}
       <main className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Intro Message with Typing Effect */}
