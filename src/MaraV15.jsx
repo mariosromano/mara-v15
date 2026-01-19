@@ -1033,17 +1033,20 @@ export default function MaraV15() {
     return `Architectural interior with floor to ceiling feature wall featuring ${model.patternDescription}, ${backlight}, professional architecture photography, ${model.trigger}`;
   };
 
-  const generateImage = async (patternKey, sectorKey, application, backlightKey) => {
+  const generateImage = async (patternKey, sectorKey, application, backlightKey, fromLanding = false) => {
     setGenerateFlow('generating');
     const model = LORA_MODELS[patternKey];
     const sectorName = SECTORS[sectorKey]?.name || sectorKey;
     const prompt = buildPrompt(patternKey, sectorKey, application, backlightKey);
-    
+
     console.log('Generating with prompt:', prompt);
-    
-    setMessages(m => [...m, 
-      { role: 'assistant', text: `Generating ${model.name} for ${sectorName} ${application}...`, isGenerateStep: true }
-    ]);
+    console.log('From landing:', fromLanding);
+
+    if (!fromLanding) {
+      setMessages(m => [...m,
+        { role: 'assistant', text: `Generating ${model.name} for ${sectorName} ${application}...`, isGenerateStep: true }
+      ]);
+    }
 
     try {
       // Step 1: Submit to FAL queue
@@ -1115,8 +1118,8 @@ export default function MaraV15() {
         };
         setGeneratedImage(genImg);
 
-        // If in landing chat, add to landing chat
-        if (showLanding) {
+        // If from landing chat, add to landing chat
+        if (fromLanding) {
           setLandingChat(prev => {
             // Remove the "Generating..." message and add result
             const filtered = prev.filter(m => !m.isGenerating);
@@ -1138,7 +1141,7 @@ export default function MaraV15() {
       }
     } catch (error) {
       console.error('Generation error:', error);
-      if (showLanding) {
+      if (fromLanding) {
         setLandingChat(prev => {
           const filtered = prev.filter(m => !m.isGenerating);
           return [...filtered, { role: 'assistant', text: 'Hmm, something went wrong. Want to try again?' }];
@@ -1789,8 +1792,8 @@ Want me to show you some backlit patterns?`;
                                       { role: 'user', text: app },
                                       { role: 'assistant', text: `Generating ${LORA_MODELS[genPattern]?.name || 'pattern'} for ${genSector} ${app}...`, isGenerating: true }
                                     ]);
-                                    // Trigger actual generation
-                                    generateLoraImage(genPattern, genSector, app);
+                                    // Trigger actual generation (pass true for fromLanding)
+                                    generateImage(genPattern, genSector, app, null, true);
                                   }}
                                   className="px-3 py-1.5 bg-stone-800 hover:bg-stone-700 border border-stone-600 rounded-lg text-xs text-stone-200 transition-colors"
                                 >
