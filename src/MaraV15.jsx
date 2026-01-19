@@ -1114,18 +1114,40 @@ export default function MaraV15() {
           backlight: backlightKey ? BACKLIGHT_COLORS[backlightKey].name : null
         };
         setGeneratedImage(genImg);
-        setShowGeneratedModal(true);
-        setMessages(m => [...m,
-          { role: 'assistant', text: `Here's your ${model.name} visualization! This design is buildable — we can generate shop drawings and pricing.`, isGenerateStep: true }
-        ]);
+
+        // If in landing chat, add to landing chat
+        if (showLanding) {
+          setLandingChat(prev => {
+            // Remove the "Generating..." message and add result
+            const filtered = prev.filter(m => !m.isGenerating);
+            return [...filtered, {
+              role: 'assistant',
+              text: `Here's your ${model.name} visualization! This design is buildable — we can generate shop drawings and pricing. Want to see more options or generate another?`,
+              generatedImage: genImg
+            }];
+          });
+          setTimeout(() => landingInputRef.current?.focus(), 100);
+        } else {
+          setShowGeneratedModal(true);
+          setMessages(m => [...m,
+            { role: 'assistant', text: `Here's your ${model.name} visualization! This design is buildable — we can generate shop drawings and pricing.`, isGenerateStep: true }
+          ]);
+        }
       } else {
         throw new Error('No image returned');
       }
     } catch (error) {
       console.error('Generation error:', error);
-      setMessages(m => [...m, 
-        { role: 'assistant', text: 'Hmm, something went wrong. Want to try again?', isGenerateStep: true }
-      ]);
+      if (showLanding) {
+        setLandingChat(prev => {
+          const filtered = prev.filter(m => !m.isGenerating);
+          return [...filtered, { role: 'assistant', text: 'Hmm, something went wrong. Want to try again?' }];
+        });
+      } else {
+        setMessages(m => [...m,
+          { role: 'assistant', text: 'Hmm, something went wrong. Want to try again?', isGenerateStep: true }
+        ]);
+      }
     } finally {
       setGenerateFlow('complete');
     }
@@ -1209,11 +1231,15 @@ export default function MaraV15() {
     const userMsg = text.trim();
     const lower = userMsg.toLowerCase();
 
-    // Check for generate intent
+    // Check for generate intent - stay in landing chat
     if (lower.includes('generate') || lower.includes('create') || lower.includes('make my') || lower.includes('design my') || lower.includes('visualiz')) {
       setInput('');
-      setShowLanding(false);
-      startGenerateFlow();
+      setLandingChat(prev => [...prev,
+        { role: 'user', text: userMsg },
+        { role: 'assistant', text: "Let's create something. Choose a pattern:", isGenerateStep: true, generateStep: 'pattern' }
+      ]);
+      setGenerateFlow('pattern');
+      setTimeout(() => landingInputRef.current?.focus(), 100);
       return;
     }
 
@@ -1663,7 +1689,7 @@ Want me to show you some backlit patterns?`;
                       </div>
                     ) : (
                       <div className="space-y-2 max-w-[85%]">
-                        {/* Image if present */}
+                        {/* Catalog Image if present */}
                         {msg.image && (
                           <button
                             onClick={() => handleImageClick(msg.image)}
@@ -1682,9 +1708,97 @@ Want me to show you some backlit patterns?`;
                           </button>
                         )}
 
+                        {/* AI Generated Image */}
+                        {msg.generatedImage && (
+                          <div className="relative w-64 aspect-video rounded-lg overflow-hidden border border-amber-500/50">
+                            <img
+                              src={msg.generatedImage.url}
+                              alt={`${msg.generatedImage.pattern} in ${msg.generatedImage.application}`}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute top-2 left-2 bg-amber-500 text-black text-[10px] font-medium px-2 py-0.5 rounded-full">
+                              AI Generated
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Generating spinner */}
+                        {msg.isGenerating && (
+                          <div className="flex items-center gap-2 py-2">
+                            <div className="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                            <span className="text-xs text-stone-400">Generating...</span>
+                          </div>
+                        )}
+
                         {/* Response Text */}
                         <div className="bg-stone-900 border border-stone-800 rounded-2xl px-4 py-3">
                           <p className="text-sm text-stone-300 leading-relaxed">{msg.text}</p>
+
+                          {/* Generate Flow Buttons */}
+                          {msg.isGenerateStep && msg.generateStep === 'pattern' && i === landingChat.length - 1 && (
+                            <div className="flex gap-2 mt-3">
+                              {Object.entries(LORA_MODELS).map(([key, model]) => (
+                                <button
+                                  key={key}
+                                  onClick={() => {
+                                    setGenPattern(key);
+                                    setGenerateFlow('sector');
+                                    setLandingChat(prev => [...prev,
+                                      { role: 'user', text: model.name },
+                                      { role: 'assistant', text: `${model.name} — ${model.description}. What sector is this for?`, isGenerateStep: true, generateStep: 'sector' }
+                                    ]);
+                                  }}
+                                  className="px-4 py-2 bg-stone-800 hover:bg-stone-700 border border-stone-600 rounded-lg text-sm text-stone-200 transition-colors"
+                                >
+                                  {model.name}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          {msg.isGenerateStep && msg.generateStep === 'sector' && i === landingChat.length - 1 && (
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              {['Healthcare', 'Hospitality', 'Corporate', 'Residential', 'Retail'].map(sector => (
+                                <button
+                                  key={sector}
+                                  onClick={() => {
+                                    setGenSector(sector);
+                                    setGenerateFlow('application');
+                                    setLandingChat(prev => [...prev,
+                                      { role: 'user', text: sector },
+                                      { role: 'assistant', text: `${sector} — great choice. What application?`, isGenerateStep: true, generateStep: 'application' }
+                                    ]);
+                                  }}
+                                  className="px-3 py-1.5 bg-stone-800 hover:bg-stone-700 border border-stone-600 rounded-lg text-xs text-stone-200 transition-colors"
+                                >
+                                  {sector}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          {msg.isGenerateStep && msg.generateStep === 'application' && i === landingChat.length - 1 && (
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              {['Feature Wall', 'Lobby', 'Corridor', 'Reception', 'Spa', 'Restaurant'].map(app => (
+                                <button
+                                  key={app}
+                                  onClick={() => {
+                                    setGenApplication(app);
+                                    setGenerateFlow('generating');
+                                    setLandingChat(prev => [...prev,
+                                      { role: 'user', text: app },
+                                      { role: 'assistant', text: `Generating ${LORA_MODELS[genPattern]?.name || 'pattern'} for ${genSector} ${app}...`, isGenerating: true }
+                                    ]);
+                                    // Trigger actual generation
+                                    generateLoraImage(genPattern, genSector, app);
+                                  }}
+                                  className="px-3 py-1.5 bg-stone-800 hover:bg-stone-700 border border-stone-600 rounded-lg text-xs text-stone-200 transition-colors"
+                                >
+                                  {app}
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
