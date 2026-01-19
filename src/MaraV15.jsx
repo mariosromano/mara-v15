@@ -1589,14 +1589,8 @@ Want me to show you some backlit patterns?`;
       {/* LANDING SCREEN */}
       {showLanding ? (
         <div className="flex-1 flex flex-col">
-          {/* Top Bar */}
-          <div className="p-4 flex items-center justify-between flex-shrink-0 border-b border-stone-800/50">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center">
-                <span className="text-base font-semibold text-stone-300">M</span>
-              </div>
-              <h1 className="text-lg font-semibold text-stone-100 tracking-tight">MR Walls</h1>
-            </div>
+          {/* Top Bar with Navigation */}
+          <div className="p-4 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-1.5 text-stone-500 text-xs">
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" strokeWidth="1.5"/>
@@ -1604,41 +1598,52 @@ Want me to show you some backlit patterns?`;
               </svg>
               50+ languages
             </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowGallery(true)}
+                className="px-3 py-1.5 text-stone-400 hover:text-stone-200 text-sm transition-colors"
+              >
+                Browse Library
+              </button>
+              <button
+                onClick={() => {
+                  setShowLanding(false);
+                  startGenerateFlow();
+                }}
+                className="px-3 py-1.5 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 rounded-lg text-sm transition-colors"
+              >
+                AI Generate
+              </button>
+            </div>
           </div>
 
           {/* Chat Area - Scrollable */}
           <div className="flex-1 overflow-y-auto p-4">
-            {/* Initial State - Centered */}
+            {/* Initial State - Centered with Input */}
             {landingChat.length === 0 && (
               <div className="h-full flex flex-col items-center justify-center -mt-8">
                 <div className="w-16 h-16 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center shadow-2xl mb-5">
                   <span className="text-2xl font-semibold text-stone-300">M</span>
                 </div>
-                <p className="text-stone-400 text-center mb-8 text-base max-w-sm">
+                <p className="text-stone-400 text-center mb-6 text-base max-w-sm">
                   The only AI that shows you what you can actually build.
                 </p>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowGallery(true)}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-stone-900 hover:bg-stone-800 rounded-xl border border-stone-700 text-stone-300 text-sm transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
-                    Browse Library
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowLanding(false);
-                      startGenerateFlow();
-                    }}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-xl text-white text-sm font-medium transition-all"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                    </svg>
-                    AI Generate
-                  </button>
+                <div className="w-full max-w-md">
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if (input.trim() && !landingLoading) {
+                      handleLandingQuery(input);
+                    }
+                  }}>
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="What are you designing?"
+                      disabled={landingLoading}
+                      className="w-full px-5 py-4 bg-stone-900 border border-stone-700 rounded-2xl text-stone-100 placeholder-stone-500 focus:outline-none focus:border-stone-500 focus:ring-1 focus:ring-stone-500 text-center disabled:opacity-50"
+                    />
+                  </form>
                 </div>
               </div>
             )}
@@ -1653,8 +1658,8 @@ Want me to show you some backlit patterns?`;
                         <p className="text-sm text-stone-100">{msg.text}</p>
                       </div>
                     ) : (
-                      <div className="space-y-2">
-                        {/* Smaller Image if present */}
+                      <div className="space-y-2 max-w-[85%]">
+                        {/* Image if present */}
                         {msg.image && (
                           <button
                             onClick={() => handleImageClick(msg.image)}
@@ -1674,56 +1679,9 @@ Want me to show you some backlit patterns?`;
                         )}
 
                         {/* Response Text */}
-                        <div className="bg-stone-900 border border-stone-800 rounded-2xl px-4 py-3 max-w-[85%]">
+                        <div className="bg-stone-900 border border-stone-800 rounded-2xl px-4 py-3">
                           <p className="text-sm text-stone-300 leading-relaxed">{msg.text}</p>
                         </div>
-
-                        {/* Action Buttons - only on last assistant message with image */}
-                        {msg.image && i === landingChat.length - 1 && (
-                          <div className="flex gap-2 flex-wrap">
-                            <button
-                              onClick={() => {
-                                const img = msg.image;
-                                const patternKey = Object.keys(LORA_MODELS).find(k => LORA_MODELS[k].name === img.pattern) || 'lake';
-                                setGenPattern(patternKey);
-                                setShowLanding(false);
-                                setGenerateFlow('sector');
-                                setMessages([{
-                                  role: 'assistant',
-                                  text: `Let's generate ${img.pattern} for your space. What sector?`,
-                                  isGenerateStep: true
-                                }]);
-                              }}
-                              className="py-2 px-3 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-lg text-xs text-white font-medium transition-all"
-                            >
-                              Generate for My Space
-                            </button>
-                            <button
-                              onClick={() => {
-                                const moreImages = (msg.allMatches || []).slice(1, 5);
-                                if (moreImages.length > 0) {
-                                  setLandingChat(prev => [...prev, {
-                                    role: 'assistant',
-                                    text: `Here's another option. ${moreImages[0]?.pattern} in a ${moreImages[0]?.sector?.toLowerCase()} setting. Want to see it in your space?`,
-                                    image: moreImages[0],
-                                    allMatches: moreImages.slice(1)
-                                  }]);
-                                } else {
-                                  setShowGallery(true);
-                                }
-                              }}
-                              className="py-2 px-3 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-lg text-xs text-stone-300 transition-colors"
-                            >
-                              Show More
-                            </button>
-                            <button
-                              onClick={() => handleImageClick(msg.image)}
-                              className="py-2 px-3 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-lg text-xs text-stone-300 transition-colors"
-                            >
-                              View Specs
-                            </button>
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
@@ -1742,33 +1700,35 @@ Want me to show you some backlit patterns?`;
             )}
           </div>
 
-          {/* Input at Bottom */}
-          <div className="p-4 border-t border-stone-800 flex-shrink-0">
-            <div className="max-w-lg mx-auto">
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                if (input.trim() && !landingLoading) {
-                  handleLandingQuery(input);
-                }
-              }} className="flex gap-3">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder={landingChat.length > 0 ? "Ask about patterns, colors, sizing..." : "What are you designing?"}
-                  disabled={landingLoading}
-                  className="flex-1 px-4 py-3 bg-stone-900 border border-stone-700 rounded-xl text-sm text-stone-100 placeholder-stone-500 focus:outline-none focus:border-stone-500 disabled:opacity-50"
-                />
-                <button
-                  type="submit"
-                  disabled={landingLoading || !input.trim()}
-                  className="px-5 py-3 bg-stone-100 text-stone-900 rounded-xl font-medium text-sm hover:bg-white disabled:opacity-50 transition-colors"
-                >
-                  Send
-                </button>
-              </form>
+          {/* Input at Bottom - only when chat has started */}
+          {landingChat.length > 0 && (
+            <div className="p-4 border-t border-stone-800 flex-shrink-0">
+              <div className="max-w-lg mx-auto">
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  if (input.trim() && !landingLoading) {
+                    handleLandingQuery(input);
+                  }
+                }} className="flex gap-3">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Ask about patterns, colors, sizing..."
+                    disabled={landingLoading}
+                    className="flex-1 px-4 py-3 bg-stone-900 border border-stone-700 rounded-xl text-sm text-stone-100 placeholder-stone-500 focus:outline-none focus:border-stone-500 disabled:opacity-50"
+                  />
+                  <button
+                    type="submit"
+                    disabled={landingLoading || !input.trim()}
+                    className="px-5 py-3 bg-stone-100 text-stone-900 rounded-xl font-medium text-sm hover:bg-white disabled:opacity-50 transition-colors"
+                  >
+                    Send
+                  </button>
+                </form>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       ) : (
         <>
