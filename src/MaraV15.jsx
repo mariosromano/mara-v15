@@ -1588,12 +1588,17 @@ Want me to show you some backlit patterns?`;
 
       {/* LANDING SCREEN */}
       {showLanding ? (
-        <div className="flex-1 flex flex-col overflow-y-auto">
+        <div className="flex-1 flex flex-col">
           {/* Top Bar */}
-          <div className="p-6 flex items-center justify-between flex-shrink-0">
-            <h1 className="text-xl font-semibold text-stone-100 tracking-tight">MR Walls</h1>
-            <div className="flex items-center gap-1.5 text-stone-500 text-sm">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="p-4 flex items-center justify-between flex-shrink-0 border-b border-stone-800/50">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center">
+                <span className="text-base font-semibold text-stone-300">M</span>
+              </div>
+              <h1 className="text-lg font-semibold text-stone-100 tracking-tight">MR Walls</h1>
+            </div>
+            <div className="flex items-center gap-1.5 text-stone-500 text-xs">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" strokeWidth="1.5"/>
                 <path strokeWidth="1.5" d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
               </svg>
@@ -1601,47 +1606,46 @@ Want me to show you some backlit patterns?`;
             </div>
           </div>
 
-          {/* Center Content */}
-          <div className={`flex-1 flex flex-col items-center px-6 ${landingChat.length > 0 ? 'pt-6' : 'justify-center -mt-16'}`}>
-            {/* Mara Avatar */}
-            <div className={`bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 ${landingChat.length > 0 ? 'w-12 h-12 mb-3' : 'w-20 h-20 mb-6'}`}>
-              <span className={`font-semibold text-stone-300 ${landingChat.length > 0 ? 'text-lg' : 'text-3xl'}`}>M</span>
-            </div>
-
-            {/* Tagline - hide when chat started */}
+          {/* Chat Area - Scrollable */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {/* Initial State - Centered */}
             {landingChat.length === 0 && (
-              <p className="text-stone-400 text-center mb-10 text-lg">
-                The only AI that shows you what you can actually build.
-              </p>
+              <div className="h-full flex flex-col items-center justify-center -mt-8">
+                <div className="w-16 h-16 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center shadow-2xl mb-5">
+                  <span className="text-2xl font-semibold text-stone-300">M</span>
+                </div>
+                <p className="text-stone-400 text-center mb-8 text-base max-w-sm">
+                  The only AI that shows you what you can actually build.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowGallery(true)}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-stone-900 hover:bg-stone-800 rounded-xl border border-stone-700 text-stone-300 text-sm transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    Browse Library
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowLanding(false);
+                      startGenerateFlow();
+                    }}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-xl text-white text-sm font-medium transition-all"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    </svg>
+                    AI Generate
+                  </button>
+                </div>
+              </div>
             )}
-
-            {/* Prompt */}
-            <h2 className={`font-medium text-stone-100 transition-all duration-300 ${landingChat.length > 0 ? 'text-base mb-3' : 'text-2xl mb-6'}`}>
-              What are you designing?
-            </h2>
-
-            {/* Input Field */}
-            <div className="w-full max-w-md mb-4">
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                if (input.trim() && !landingLoading) {
-                  handleLandingQuery(input);
-                }
-              }}>
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder={landingChat.length > 0 ? "Continue the conversation..." : "e.g., spa lobby, hospital corridor, hotel feature wall..."}
-                  disabled={landingLoading}
-                  className="w-full px-5 py-4 bg-stone-900 border border-stone-700 rounded-2xl text-stone-100 placeholder-stone-500 focus:outline-none focus:border-stone-500 focus:ring-1 focus:ring-stone-500 text-center disabled:opacity-50"
-                />
-              </form>
-            </div>
 
             {/* Chat Messages */}
             {landingChat.length > 0 && (
-              <div className="w-full max-w-md space-y-4 mb-6">
+              <div className="max-w-lg mx-auto space-y-4">
                 {landingChat.map((msg, i) => (
                   <div key={i} className={`animate-fadeIn ${msg.role === 'user' ? 'flex justify-end' : ''}`}>
                     {msg.role === 'user' ? (
@@ -1649,34 +1653,34 @@ Want me to show you some backlit patterns?`;
                         <p className="text-sm text-stone-100">{msg.text}</p>
                       </div>
                     ) : (
-                      <div className="space-y-3">
-                        {/* Image if present */}
+                      <div className="space-y-2">
+                        {/* Smaller Image if present */}
                         {msg.image && (
                           <button
                             onClick={() => handleImageClick(msg.image)}
-                            className="w-full aspect-[16/10] rounded-xl overflow-hidden border border-stone-800 hover:border-stone-600 transition-all relative"
+                            className="w-48 aspect-[4/3] rounded-lg overflow-hidden border border-stone-800 hover:border-stone-600 transition-all relative"
                           >
                             <img
                               src={msg.image.image}
                               alt={msg.image.title}
                               className="w-full h-full object-cover"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                            <div className="absolute bottom-0 left-0 right-0 p-4">
-                              <p className="text-lg font-medium text-white">{msg.image.title}</p>
-                              <p className="text-sm text-stone-300">{msg.image.pattern} • {msg.image.sector}</p>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                            <div className="absolute bottom-0 left-0 right-0 p-2">
+                              <p className="text-xs font-medium text-white truncate">{msg.image.title}</p>
+                              <p className="text-[10px] text-stone-300">{msg.image.pattern}</p>
                             </div>
                           </button>
                         )}
 
                         {/* Response Text */}
-                        <div className="bg-stone-900 border border-stone-800 rounded-2xl px-4 py-3">
+                        <div className="bg-stone-900 border border-stone-800 rounded-2xl px-4 py-3 max-w-[85%]">
                           <p className="text-sm text-stone-300 leading-relaxed">{msg.text}</p>
                         </div>
 
                         {/* Action Buttons - only on last assistant message with image */}
                         {msg.image && i === landingChat.length - 1 && (
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap">
                             <button
                               onClick={() => {
                                 const img = msg.image;
@@ -1690,7 +1694,7 @@ Want me to show you some backlit patterns?`;
                                   isGenerateStep: true
                                 }]);
                               }}
-                              className="flex-1 py-2.5 px-3 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-xl text-sm text-white font-medium transition-all"
+                              className="py-2 px-3 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-lg text-xs text-white font-medium transition-all"
                             >
                               Generate for My Space
                             </button>
@@ -1700,7 +1704,7 @@ Want me to show you some backlit patterns?`;
                                 if (moreImages.length > 0) {
                                   setLandingChat(prev => [...prev, {
                                     role: 'assistant',
-                                    text: `Here's another option. ${moreImages[0]?.pattern} in a ${moreImages[0]?.sector?.toLowerCase()} setting.`,
+                                    text: `Here's another option. ${moreImages[0]?.pattern} in a ${moreImages[0]?.sector?.toLowerCase()} setting. Want to see it in your space?`,
                                     image: moreImages[0],
                                     allMatches: moreImages.slice(1)
                                   }]);
@@ -1708,13 +1712,13 @@ Want me to show you some backlit patterns?`;
                                   setShowGallery(true);
                                 }
                               }}
-                              className="py-2.5 px-3 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-xl text-sm text-stone-300 transition-colors"
+                              className="py-2 px-3 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-lg text-xs text-stone-300 transition-colors"
                             >
                               Show More
                             </button>
                             <button
                               onClick={() => handleImageClick(msg.image)}
-                              className="py-2.5 px-3 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-xl text-sm text-stone-300 transition-colors"
+                              className="py-2 px-3 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-lg text-xs text-stone-300 transition-colors"
                             >
                               View Specs
                             </button>
@@ -1733,44 +1737,37 @@ Want me to show you some backlit patterns?`;
                     <div className="w-2 h-2 bg-stone-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                 )}
+                <div ref={messagesEndRef} />
               </div>
             )}
+          </div>
 
-            {/* Divider - only show when no chat */}
-            {landingChat.length === 0 && (
-              <>
-                <div className="flex items-center gap-4 mb-8 w-full max-w-md">
-                  <div className="flex-1 h-px bg-stone-800"></div>
-                  <span className="text-stone-600 text-sm">or</span>
-                  <div className="flex-1 h-px bg-stone-800"></div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-4">
-                  <button
-                    onClick={() => setShowGallery(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-stone-900 hover:bg-stone-800 rounded-xl border border-stone-700 text-stone-300 transition-colors"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
-                    Browse Library
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowLanding(false);
-                      startGenerateFlow();
-                    }}
-                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-xl text-white font-medium transition-all"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                    </svg>
-                    AI Generate
-                  </button>
-                </div>
-              </>
-            )}
+          {/* Input at Bottom */}
+          <div className="p-4 border-t border-stone-800 flex-shrink-0">
+            <div className="max-w-lg mx-auto">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                if (input.trim() && !landingLoading) {
+                  handleLandingQuery(input);
+                }
+              }} className="flex gap-3">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={landingChat.length > 0 ? "Ask about patterns, colors, sizing..." : "What are you designing?"}
+                  disabled={landingLoading}
+                  className="flex-1 px-4 py-3 bg-stone-900 border border-stone-700 rounded-xl text-sm text-stone-100 placeholder-stone-500 focus:outline-none focus:border-stone-500 disabled:opacity-50"
+                />
+                <button
+                  type="submit"
+                  disabled={landingLoading || !input.trim()}
+                  className="px-5 py-3 bg-stone-100 text-stone-900 rounded-xl font-medium text-sm hover:bg-white disabled:opacity-50 transition-colors"
+                >
+                  Send
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       ) : (
