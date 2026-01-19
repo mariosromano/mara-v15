@@ -877,6 +877,7 @@ export default function MaraV15() {
 
   const messagesEndRef = useRef(null);
   const modalInputRef = useRef(null);
+  const landingInputRef = useRef(null);
 
   // Start with empty messages - landing screen handles intro
   useEffect(() => {
@@ -1291,6 +1292,8 @@ export default function MaraV15() {
     }
 
     setLandingLoading(false);
+    // Keep focus on input for continuous typing
+    setTimeout(() => landingInputRef.current?.focus(), 100);
   };
 
   const send = async (text, fromModal = false) => {
@@ -1713,6 +1716,7 @@ Want me to show you some backlit patterns?`;
                   }
                 }} className="flex gap-3">
                   <input
+                    ref={landingInputRef}
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
