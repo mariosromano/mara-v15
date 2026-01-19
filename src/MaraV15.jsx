@@ -1225,25 +1225,41 @@ export default function MaraV15() {
     setInput('');
     setLandingResult({ loading: true });
 
+    // Check if this is an informational question (not a design query)
+    const isQuestion = lower.includes('what') || lower.includes('who') || lower.includes('how') || lower.includes('why') || lower.includes('tell me') || lower.includes('?');
+
     // Search for matching images
     const matchedImages = searchImages(userMsg);
-    const images = matchedImages.length > 0 ? matchedImages : [IMAGE_CATALOG.find(i => i.id === 'buddha-1')];
 
-    // Get brief response from Claude
+    // Get response from Claude
     const claudeResponse = await callClaude(userMsg, []);
-    let responseText = claudeResponse ? cleanResponse(claudeResponse) : `This ${images[0]?.pattern || 'pattern'} would work beautifully for your space.`;
+    let responseText = claudeResponse ? cleanResponse(claudeResponse) : '';
 
-    // Keep it brief - just first sentence or two
-    const sentences = responseText.split(/[.!?]+/).filter(s => s.trim());
-    responseText = sentences.slice(0, 2).join('. ').trim();
-    if (responseText && !responseText.endsWith('.')) responseText += '.';
+    // Keep it brief - just first 2-3 sentences
+    if (responseText) {
+      const sentences = responseText.split(/[.!?]+/).filter(s => s.trim());
+      responseText = sentences.slice(0, 3).join('. ').trim();
+      if (responseText && !responseText.endsWith('.') && !responseText.endsWith('!') && !responseText.endsWith('?')) responseText += '.';
+    }
 
-    setLandingResult({
-      image: images[0],
-      text: responseText,
-      allMatches: images,
-      loading: false
-    });
+    // For informational questions without matching images, show text-only response
+    if (isQuestion && matchedImages.length === 0) {
+      setLandingResult({
+        image: null,
+        text: responseText || "MR Walls creates carved DuPont Corian wall surfaces. We're the exclusive North American partner with DuPont for architectural walls. What are you designing?",
+        allMatches: [],
+        loading: false
+      });
+    } else {
+      // Design query - show image with response
+      const images = matchedImages.length > 0 ? matchedImages : [IMAGE_CATALOG.find(i => i.id === 'buddha-1')];
+      setLandingResult({
+        image: images[0],
+        text: responseText || `This ${images[0]?.pattern || 'pattern'} would work beautifully for your space.`,
+        allMatches: images,
+        loading: false
+      });
+    }
   };
 
   const send = async (text, fromModal = false) => {
@@ -1597,6 +1613,17 @@ Want me to show you some backlit patterns?`;
                 <div className="w-2 h-2 bg-stone-500 rounded-full animate-bounce" />
                 <div className="w-2 h-2 bg-stone-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                 <div className="w-2 h-2 bg-stone-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            )}
+
+            {/* Result - Text only (for informational questions) */}
+            {landingResult && !landingResult.loading && !landingResult.image && landingResult.text && (
+              <div className="w-full max-w-md animate-fadeIn mb-8">
+                <div className="bg-stone-900 border border-stone-800 rounded-2xl p-5">
+                  <p className="text-stone-300 text-center text-sm leading-relaxed">
+                    {landingResult.text}
+                  </p>
+                </div>
               </div>
             )}
 
