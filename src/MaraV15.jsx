@@ -1648,9 +1648,10 @@ Want me to show you some backlit patterns?`;
               </div>
             )}
 
-            {/* Chat Messages */}
+            {/* Chat Messages - align to bottom */}
             {landingChat.length > 0 && (
-              <div className="max-w-lg mx-auto space-y-4">
+              <div className="min-h-full flex flex-col justify-end pb-4">
+                <div className="max-w-lg mx-auto space-y-4 w-full">
                 {landingChat.map((msg, i) => (
                   <div key={i} className={`animate-fadeIn ${msg.role === 'user' ? 'flex justify-end' : ''}`}>
                     {msg.role === 'user' ? (
@@ -1696,6 +1697,7 @@ Want me to show you some backlit patterns?`;
                   </div>
                 )}
                 <div ref={messagesEndRef} />
+                </div>
               </div>
             )}
           </div>
