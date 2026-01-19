@@ -1242,6 +1242,15 @@ export default function MaraV15() {
       if (responseText && !responseText.endsWith('.') && !responseText.endsWith('!') && !responseText.endsWith('?')) responseText += '.';
     }
 
+    // Follow-up questions to drive conversation
+    const followUps = [
+      "What sector is this for?",
+      "Would you like to see it backlit?",
+      "What size wall are you working with?",
+      "Want to see more options?"
+    ];
+    const followUp = followUps[Math.floor(Math.random() * followUps.length)];
+
     // For informational questions without matching images, show text-only response
     if (isQuestion && matchedImages.length === 0) {
       setLandingResult({
@@ -1251,11 +1260,21 @@ export default function MaraV15() {
         loading: false
       });
     } else {
-      // Design query - show image with response
+      // Design query - show image with brief response + follow-up question
       const images = matchedImages.length > 0 ? matchedImages : [IMAGE_CATALOG.find(i => i.id === 'buddha-1')];
+      const img = images[0];
+
+      // Build conversational response with follow-up
+      let text = responseText || `${img?.pattern || 'This pattern'} works beautifully in ${img?.sector?.toLowerCase() || 'this type of space'}.`;
+
+      // Add follow-up question if response doesn't already end with one
+      if (!text.endsWith('?')) {
+        text = text + ' ' + followUp;
+      }
+
       setLandingResult({
-        image: images[0],
-        text: responseText || `This ${images[0]?.pattern || 'pattern'} would work beautifully for your space.`,
+        image: img,
+        text: text,
         allMatches: images,
         loading: false
       });
