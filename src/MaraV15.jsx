@@ -561,8 +561,8 @@ const IMAGE_CATALOG = [
     description: 'Desert Sunset variation — mountain ridges and desert sky.'
   },
   {
-    id: 'desert-sunset-3',
-    pattern: 'Desert Sunset',
+    id: 'sand-dune-1',
+    pattern: 'Sand Dune',
     title: 'Desert Mountains Orange',
     sector: 'Hospitality',
     corianColor: 'Glacier White',
