@@ -1213,7 +1213,7 @@ export default function MaraV15() {
     const lower = userMsg.toLowerCase();
     
     // Check for generate intent
-    if (lower.includes('generate') || lower.includes('create') || lower.includes('visualiz')) {
+    if (lower.includes('generate') || lower.includes('create') || lower.includes('make my') || lower.includes('design my') || lower.includes('visualiz')) {
       setInput('');
       setMessages(m => [...m, { role: 'user', text: userMsg }]);
       startGenerateFlow();
