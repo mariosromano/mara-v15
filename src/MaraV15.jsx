@@ -859,6 +859,7 @@ export default function MaraV15() {
   const [heroImage, setHeroImage] = useState(null); // Current hero image on product page
   const [patternGallery, setPatternGallery] = useState([]); // Related images for pattern
   const [showGallery, setShowGallery] = useState(false);
+  const [showLanding, setShowLanding] = useState(true); // Show landing screen initially
   
   // AI Generate state
   const [generateFlow, setGenerateFlow] = useState(null); // null, 'pattern', 'sector', 'application', 'backlight', 'generating'
@@ -875,17 +876,9 @@ export default function MaraV15() {
   const messagesEndRef = useRef(null);
   const modalInputRef = useRef(null);
 
-  // Add initial images on mount (no typing effect)
+  // Start with empty messages - landing screen handles intro
   useEffect(() => {
-    setMessages([{
-      role: 'assistant',
-      text: '',
-      images: [
-        IMAGE_CATALOG.find(i => i.id === 'buddha-1'),
-        IMAGE_CATALOG.find(i => i.id === 'greatwave-1')
-      ],
-      isIntroImages: true
-    }]);
+    setMessages([]);
   }, []);
 
   useEffect(() => {
@@ -1483,63 +1476,132 @@ Want me to show you some backlit patterns?`;
         .pattern-card:nth-child(3) { animation-delay: 0.4s; }
       `}</style>
 
-      {/* Header */}
-      <header className="p-4 border-b border-stone-800 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center">
-            <span className="text-lg font-semibold text-stone-300">M</span>
+      {/* LANDING SCREEN */}
+      {showLanding ? (
+        <div className="flex-1 flex flex-col">
+          {/* Top Bar */}
+          <div className="p-6 flex items-center justify-between">
+            <h1 className="text-xl font-semibold text-stone-100 tracking-tight">MR Walls</h1>
+            <div className="flex items-center gap-1.5 text-stone-500 text-sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" strokeWidth="1.5"/>
+                <path strokeWidth="1.5" d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+              </svg>
+              50+ languages
+            </div>
           </div>
-          <div>
-            <h1 className="font-semibold text-stone-100">Mara</h1>
-            <p className="text-xs text-stone-500">Mara × MR Walls</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={startGenerateFlow}
-            className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-lg text-sm text-white font-medium transition-all"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-            </svg>
-            AI Generate
-          </button>
-          <button
-            onClick={() => setShowGallery(true)}
-            className="flex items-center gap-2 px-3 py-2 bg-stone-900 hover:bg-stone-800 rounded-lg border border-stone-700 text-sm text-stone-300 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-            </svg>
-            Browse All
-          </button>
-        </div>
-      </header>
 
-      {/* Tagline & Language Indicator */}
-      <div className="px-4 py-3 text-center border-b border-stone-800/50">
-        <p className="text-sm text-stone-400 mb-1">The only AI that shows you what you can actually build.</p>
-        <p className="text-xs text-stone-500 flex items-center justify-center gap-1">
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" strokeWidth="1.5"/>
-            <path strokeWidth="1.5" d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
-          </svg>
-          Chat in any language
-        </p>
-      </div>
+          {/* Center Content */}
+          <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-16">
+            {/* Mara Avatar */}
+            <div className="w-20 h-20 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center mb-6 shadow-2xl">
+              <span className="text-3xl font-semibold text-stone-300">M</span>
+            </div>
 
-      {/* Messages */}
-      <main className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Intro Message with Typing Effect */}
-        <div className="flex justify-start">
-          <div className="max-w-[85%]">
-            <div className="bg-stone-900 border border-stone-800 rounded-2xl px-4 py-3">
-              <p className="text-sm whitespace-pre-wrap">{renderIntroText()}</p>
+            {/* Tagline */}
+            <p className="text-stone-400 text-center mb-10 text-lg">
+              The only AI that shows you what you can actually build.
+            </p>
+
+            {/* Prompt */}
+            <h2 className="text-2xl font-medium text-stone-100 mb-6">
+              What are you designing?
+            </h2>
+
+            {/* Input Field */}
+            <div className="w-full max-w-md mb-8">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                if (input.trim()) {
+                  setShowLanding(false);
+                  send(input);
+                }
+              }}>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="e.g., spa lobby, hospital corridor, hotel feature wall..."
+                  className="w-full px-5 py-4 bg-stone-900 border border-stone-700 rounded-2xl text-stone-100 placeholder-stone-500 focus:outline-none focus:border-stone-500 focus:ring-1 focus:ring-stone-500 text-center"
+                />
+              </form>
+            </div>
+
+            {/* Divider */}
+            <div className="flex items-center gap-4 mb-8 w-full max-w-md">
+              <div className="flex-1 h-px bg-stone-800"></div>
+              <span className="text-stone-600 text-sm">or</span>
+              <div className="flex-1 h-px bg-stone-800"></div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowGallery(true)}
+                className="flex items-center gap-2 px-6 py-3 bg-stone-900 hover:bg-stone-800 rounded-xl border border-stone-700 text-stone-300 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                Browse Library
+              </button>
+              <button
+                onClick={() => {
+                  setShowLanding(false);
+                  startGenerateFlow();
+                }}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-xl text-white font-medium transition-all"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                AI Generate
+              </button>
             </div>
           </div>
         </div>
+      ) : (
+        <>
+          {/* CONVERSATION VIEW - Header */}
+          <header className="p-4 border-b border-stone-800 flex items-center justify-between">
+            <button
+              onClick={() => setShowLanding(true)}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center">
+                <span className="text-lg font-semibold text-stone-300">M</span>
+              </div>
+              <div>
+                <h1 className="font-semibold text-stone-100">Mara</h1>
+                <p className="text-xs text-stone-500">MR Walls</p>
+              </div>
+            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  startGenerateFlow();
+                }}
+                className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-lg text-sm text-white font-medium transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                AI Generate
+              </button>
+              <button
+                onClick={() => setShowGallery(true)}
+                className="flex items-center gap-2 px-3 py-2 bg-stone-900 hover:bg-stone-800 rounded-lg border border-stone-700 text-sm text-stone-300 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                Browse All
+              </button>
+            </div>
+          </header>
 
-        {/* Messages */}
+          {/* Messages */}
+      <main className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className="max-w-[85%]">
@@ -1655,6 +1717,8 @@ Want me to show you some backlit patterns?`;
           </button>
         </div>
       </footer>
+        </>
+      )}
 
       {/* GENERATED IMAGE MODAL */}
       {showGeneratedModal && generatedImage && (
