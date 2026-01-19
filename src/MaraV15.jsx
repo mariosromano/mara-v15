@@ -860,6 +860,7 @@ export default function MaraV15() {
   const [patternGallery, setPatternGallery] = useState([]); // Related images for pattern
   const [showGallery, setShowGallery] = useState(false);
   const [showLanding, setShowLanding] = useState(true); // Show landing screen initially
+  const [landingResult, setLandingResult] = useState(null); // { image, text, allMatches, loading }
   
   // AI Generate state
   const [generateFlow, setGenerateFlow] = useState(null); // null, 'pattern', 'sector', 'application', 'backlight', 'generating'
@@ -1199,9 +1200,55 @@ export default function MaraV15() {
     }
   };
 
+  // Handle landing page query - stays on same screen
+  const handleLandingQuery = async (text) => {
+    if (!text?.trim()) return;
+
+    const userMsg = text.trim();
+    const lower = userMsg.toLowerCase();
+
+    // Check for generate intent
+    if (lower.includes('generate') || lower.includes('create') || lower.includes('make my') || lower.includes('design my') || lower.includes('visualiz')) {
+      setInput('');
+      setShowLanding(false);
+      startGenerateFlow();
+      return;
+    }
+
+    // Browse intent
+    if (lower.includes('everything') || lower.includes('all image') || lower.includes('browse') || lower.includes('scroll') || lower.includes('gallery') || lower.includes('show me all') || lower.includes('see all')) {
+      setInput('');
+      setShowGallery(true);
+      return;
+    }
+
+    setInput('');
+    setLandingResult({ loading: true });
+
+    // Search for matching images
+    const matchedImages = searchImages(userMsg);
+    const images = matchedImages.length > 0 ? matchedImages : [IMAGE_CATALOG.find(i => i.id === 'buddha-1')];
+
+    // Get brief response from Claude
+    const claudeResponse = await callClaude(userMsg, []);
+    let responseText = claudeResponse ? cleanResponse(claudeResponse) : `This ${images[0]?.pattern || 'pattern'} would work beautifully for your space.`;
+
+    // Keep it brief - just first sentence or two
+    const sentences = responseText.split(/[.!?]+/).filter(s => s.trim());
+    responseText = sentences.slice(0, 2).join('. ').trim();
+    if (responseText && !responseText.endsWith('.')) responseText += '.';
+
+    setLandingResult({
+      image: images[0],
+      text: responseText,
+      allMatches: images,
+      loading: false
+    });
+  };
+
   const send = async (text, fromModal = false) => {
     if (!text?.trim() || loading) return;
-    
+
     const userMsg = text.trim();
     const lower = userMsg.toLowerCase();
     
@@ -1463,6 +1510,19 @@ Want me to show you some backlit patterns?`;
             background-position: 200% 0;
           }
         }
+        @keyframes fadeIn {
+          0% {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.4s ease-out forwards;
+        }
         .smoke-overlay {
           animation: smokeIn 0.5s ease-out forwards;
         }
@@ -1481,9 +1541,9 @@ Want me to show you some backlit patterns?`;
 
       {/* LANDING SCREEN */}
       {showLanding ? (
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col overflow-y-auto">
           {/* Top Bar */}
-          <div className="p-6 flex items-center justify-between">
+          <div className="p-6 flex items-center justify-between flex-shrink-0">
             <h1 className="text-xl font-semibold text-stone-100 tracking-tight">MR Walls</h1>
             <div className="flex items-center gap-1.5 text-stone-500 text-sm">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1495,29 +1555,30 @@ Want me to show you some backlit patterns?`;
           </div>
 
           {/* Center Content */}
-          <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-16">
+          <div className={`flex-1 flex flex-col items-center px-6 ${landingResult ? 'pt-8' : 'justify-center -mt-16'}`}>
             {/* Mara Avatar */}
-            <div className="w-20 h-20 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center mb-6 shadow-2xl">
-              <span className="text-3xl font-semibold text-stone-300">M</span>
+            <div className={`bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 ${landingResult ? 'w-14 h-14 mb-4' : 'w-20 h-20 mb-6'}`}>
+              <span className={`font-semibold text-stone-300 ${landingResult ? 'text-xl' : 'text-3xl'}`}>M</span>
             </div>
 
-            {/* Tagline */}
-            <p className="text-stone-400 text-center mb-10 text-lg">
-              The only AI that shows you what you can actually build.
-            </p>
+            {/* Tagline - hide when result shown */}
+            {!landingResult && (
+              <p className="text-stone-400 text-center mb-10 text-lg">
+                The only AI that shows you what you can actually build.
+              </p>
+            )}
 
             {/* Prompt */}
-            <h2 className="text-2xl font-medium text-stone-100 mb-6">
+            <h2 className={`font-medium text-stone-100 transition-all duration-300 ${landingResult ? 'text-lg mb-4' : 'text-2xl mb-6'}`}>
               What are you designing?
             </h2>
 
             {/* Input Field */}
-            <div className="w-full max-w-md mb-8">
+            <div className="w-full max-w-md mb-6">
               <form onSubmit={(e) => {
                 e.preventDefault();
                 if (input.trim()) {
-                  setShowLanding(false);
-                  send(input);
+                  handleLandingQuery(input);
                 }
               }}>
                 <input
@@ -1530,37 +1591,121 @@ Want me to show you some backlit patterns?`;
               </form>
             </div>
 
-            {/* Divider */}
-            <div className="flex items-center gap-4 mb-8 w-full max-w-md">
-              <div className="flex-1 h-px bg-stone-800"></div>
-              <span className="text-stone-600 text-sm">or</span>
-              <div className="flex-1 h-px bg-stone-800"></div>
-            </div>
+            {/* Loading State */}
+            {landingResult?.loading && (
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-2 h-2 bg-stone-500 rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-stone-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-2 h-2 bg-stone-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            )}
 
-            {/* Action Buttons */}
-            <div className="flex gap-4">
-              <button
-                onClick={() => setShowGallery(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-stone-900 hover:bg-stone-800 rounded-xl border border-stone-700 text-stone-300 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-                Browse Library
-              </button>
-              <button
-                onClick={() => {
-                  setShowLanding(false);
-                  startGenerateFlow();
-                }}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-xl text-white font-medium transition-all"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                </svg>
-                AI Generate
-              </button>
-            </div>
+            {/* Result - Image + Text + Buttons */}
+            {landingResult && !landingResult.loading && landingResult.image && (
+              <div className="w-full max-w-md animate-fadeIn">
+                {/* Image */}
+                <button
+                  onClick={() => handleImageClick(landingResult.image)}
+                  className="w-full aspect-[16/10] rounded-xl overflow-hidden border border-stone-800 hover:border-stone-600 transition-all mb-4 relative"
+                >
+                  <img
+                    src={landingResult.image.image}
+                    alt={landingResult.image.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <p className="text-lg font-medium text-white">{landingResult.image.title}</p>
+                    <p className="text-sm text-stone-300">{landingResult.image.pattern} • {landingResult.image.sector}</p>
+                  </div>
+                </button>
+
+                {/* Mara Response Text */}
+                <p className="text-stone-300 text-center mb-4 text-sm leading-relaxed">
+                  {landingResult.text}
+                </p>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 mb-8">
+                  <button
+                    onClick={() => {
+                      const img = landingResult.image;
+                      const patternKey = Object.keys(LORA_MODELS).find(k => LORA_MODELS[k].name === img.pattern) || 'lake';
+                      setGenPattern(patternKey);
+                      setShowLanding(false);
+                      setGenerateFlow('sector');
+                      setMessages([{
+                        role: 'assistant',
+                        text: `Let's generate ${img.pattern} for your space. What sector?`,
+                        isGenerateStep: true
+                      }]);
+                    }}
+                    className="flex-1 py-3 px-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-xl text-sm text-white font-medium transition-all"
+                  >
+                    Generate for My Space
+                  </button>
+                  <button
+                    onClick={() => {
+                      const moreImages = (landingResult.allMatches || []).slice(1, 5);
+                      if (moreImages.length > 0) {
+                        setLandingResult({
+                          ...landingResult,
+                          image: moreImages[0],
+                          allMatches: [...moreImages.slice(1), landingResult.image, ...landingResult.allMatches.slice(5)]
+                        });
+                      } else {
+                        setShowGallery(true);
+                      }
+                    }}
+                    className="py-3 px-4 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-xl text-sm text-stone-300 transition-colors"
+                  >
+                    Show More
+                  </button>
+                  <button
+                    onClick={() => handleImageClick(landingResult.image)}
+                    className="py-3 px-4 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-xl text-sm text-stone-300 transition-colors"
+                  >
+                    View Specs
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Divider - only show when no result */}
+            {!landingResult && (
+              <>
+                <div className="flex items-center gap-4 mb-8 w-full max-w-md">
+                  <div className="flex-1 h-px bg-stone-800"></div>
+                  <span className="text-stone-600 text-sm">or</span>
+                  <div className="flex-1 h-px bg-stone-800"></div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setShowGallery(true)}
+                    className="flex items-center gap-2 px-6 py-3 bg-stone-900 hover:bg-stone-800 rounded-xl border border-stone-700 text-stone-300 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    Browse Library
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowLanding(false);
+                      startGenerateFlow();
+                    }}
+                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 rounded-xl text-white font-medium transition-all"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    </svg>
+                    AI Generate
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       ) : (
