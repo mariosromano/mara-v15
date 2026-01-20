@@ -1700,7 +1700,7 @@ Want me to show you some backlit patterns?`;
                         {msg.image && (
                           <button
                             onClick={() => handleImageClick(msg.image)}
-                            className="w-48 aspect-[4/3] rounded-lg overflow-hidden border border-stone-800 hover:border-stone-600 transition-all relative"
+                            className="w-72 aspect-[4/3] rounded-lg overflow-hidden border border-stone-800 hover:border-stone-600 transition-all relative"
                           >
                             <img
                               src={msg.image.image}
@@ -1717,15 +1717,26 @@ Want me to show you some backlit patterns?`;
 
                         {/* AI Generated Image */}
                         {msg.generatedImage && (
-                          <div className="relative w-64 aspect-video rounded-lg overflow-hidden border border-amber-500/50">
-                            <img
-                              src={msg.generatedImage.url}
-                              alt={`${msg.generatedImage.pattern} in ${msg.generatedImage.application}`}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute top-2 left-2 bg-amber-500 text-black text-[10px] font-medium px-2 py-0.5 rounded-full">
-                              AI Generated
+                          <div className="flex flex-col gap-2">
+                            <div className="relative w-96 aspect-video rounded-lg overflow-hidden border border-amber-500/50">
+                              <img
+                                src={msg.generatedImage.url}
+                                alt={`${msg.generatedImage.pattern} in ${msg.generatedImage.application}`}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute top-2 left-2 bg-amber-500 text-black text-[10px] font-medium px-2 py-0.5 rounded-full">
+                                AI Generated
+                              </div>
                             </div>
+                            <button
+                              onClick={() => downloadGeneratedImage(msg.generatedImage.url, msg.generatedImage.pattern)}
+                              className="w-fit px-4 py-2 bg-stone-800 hover:bg-stone-700 border border-stone-600 rounded-lg text-xs font-medium transition-colors flex items-center gap-2"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                              </svg>
+                              Download
+                            </button>
                           </div>
                         )}
 
@@ -1929,7 +1940,7 @@ Want me to show you some backlit patterns?`;
                       <button
                         key={j}
                         onClick={() => handleImageClick(img)}
-                        className={`relative rounded-xl overflow-hidden border border-stone-800 hover:border-stone-600 transition-all text-left ${msg.isRecommendation ? 'w-full aspect-[16/10]' : 'aspect-[4/3]'}`}
+                        className={`relative rounded-xl overflow-hidden border border-stone-800 hover:border-stone-600 transition-all text-left ${msg.isRecommendation ? 'w-full aspect-[16/10]' : 'w-[350px] aspect-[4/3]'}`}
                       >
                         <img src={img.image} alt={img.title} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
