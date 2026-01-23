@@ -649,8 +649,8 @@ const IMAGE_CATALOG = [
     corianColor: 'Glacier White',
     mood: ['geometric', 'natural', 'warm', 'glowing'],
     isBacklit: true,
-    keywords: ['honey', 'honeycomb', 'backlit', 'backlight', 'geometric', 'hexagon', 'glow'],
-    image: `${CLOUDINARY_BASE}/v1769147362/billow-backlight_w4hjru.jpg`,
+    keywords: ['honey', 'honeycomb', 'backlit', 'backlight', 'geometric', 'hexagon', 'glow', 'dining'],
+    image: `${CLOUDINARY_BASE}/v1769147358/honey-dinning-people_okihjf.jpg`,
     specs: { material: 'DuPont Corian®', color: 'Glacier White', size: '10\' H × 17\' W', leadTime: '4-6 Weeks', pricePerSF: 100, enhancement: 'Backlighting', system: 'InterlockPanel™' },
     description: 'Honey with backlighting — honeycomb-inspired pattern glows warmly. 10 feet high by 17 feet wide.'
   },
