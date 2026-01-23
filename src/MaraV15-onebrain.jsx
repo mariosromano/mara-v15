@@ -914,9 +914,11 @@ export default function MaraV15() {
     setPatternGallery([]);
   };
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom and keep input focused
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Re-focus input after scroll
+    setTimeout(() => inputRef.current?.focus(), 100);
   }, [messages]);
 
   // Focus input on load
