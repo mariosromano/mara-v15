@@ -7,8 +7,8 @@ import { useState, useRef, useEffect } from 'react';
 
 const CLOUDINARY_BASE = 'https://res.cloudinary.com/dtlodxxio/image/upload';
 
-// ⚠️ FAL API KEY
-const FAL_API_KEY = "3e417ede-cd4b-4b81-8116-2684760b5a70:2e1ad6ff3d9d2a171a31d6ebc2612073";
+// ⚠️ FAL API KEY (from environment variable)
+const FAL_API_KEY = import.meta.env.VITE_FAL_API_KEY;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // LORA MODELS FOR AI GENERATE
@@ -743,29 +743,59 @@ Team: Mario Romano (Founder), Carlo & Kamila (VP), Sawyer & Toni (Sales), Samant
 - Water feature add-on: +$20/SF
 - Lead time: 4-10 weeks depending on complexity
 
+## ⚠️ CRITICAL: CHOOSING THE RIGHT CATALOG ⚠️
+This is the MOST IMPORTANT rule. You must choose the correct catalog based on user intent:
+
+**USE PROJECTS_CATALOG (tag: [Project: id]) when user asks about:**
+- "your work" / "your projects" / "show me your work"
+- "portfolio" / "completed installations" / "case studies"
+- "projects you've done" / "past projects" / "installations"
+- "who have you worked with" / "clients"
+- Generic questions about MR Walls' work/experience
+
+**USE IMAGE_CATALOG (tag: [Image: id]) when user asks about:**
+- A SPECIFIC pattern by name ("show me Lake", "Flame pattern", "Great Wave")
+- "patterns" / "products" / "available designs"
+- Specific applications ("shower", "fireplace", "lobby")
+- Specific features ("backlit", "water feature")
+
+**USE VIDEOS_CATALOG (tag: [Video: id]) when user asks about:**
+- "installation" / "how to install"
+- "how it works" / "demo"
+
+⚠️ DO NOT confuse products with projects. Products are patterns (Lake, Flame, Brick). Projects are completed installations (LAX, Morongo Casino, Capital One Arena).
+
 ## HOW TO SHOW CONTENT
-Use these tags in your response to display media:
-- [Image: id] — shows a product image
-- [Project: id] — shows a project/case study
+Use these EXACT tags with the ID from the catalogs:
+- [Image: id] — shows a PRODUCT (pattern like Lake, Flame, Great Wave)
+- [Project: id] — shows a COMPLETED PROJECT (LAX, Morongo, Capital One)
 - [Video: id] — shows an instructional video
 
-Example: "Lake is perfect for meditation spaces. [Image: lake-backlit-1]"
+IMPORTANT: Use ONLY the exact IDs from the catalogs. Do NOT use URLs or make up IDs.
+
+Examples:
+- "Lake is perfect for meditation spaces. [Image: lake-backlit-1]"
+- "Here's our LAX project for American Airlines. [Project: project-lax-american]"
+- "Here's how installation works. [Video: video-interlock-install]"
 
 ## RULES
-1. Show max 2 images per response
-2. NEVER ask "would you like to see it backlit?" if the item already has isBacklit: true
-3. Don't show the same item twice in a conversation — pick something new
+1. Show max 2 items per response
+2. CRITICAL: If an item has isBacklit: true, NEVER ask "would you like to see it backlit?" — it already IS backlit
+3. Don't show the same item twice in a conversation
 4. General questions (who is Mario, what is MR Walls, pricing) do NOT need images
 5. Match the user's depth — design language for explorers, technical for specifiers
 6. If user says "yes", "more", "show me more" — show the next relevant item, don't repeat
+7. When showing a backlit item, you can mention it's backlit but don't ask if they want to see it backlit
 
-## AVAILABLE PRODUCTS (IMAGE_CATALOG)
-${JSON.stringify(imageList, null, 2)}
-
-## COMPLETED PROJECTS (PROJECTS_CATALOG)
+## COMPLETED PROJECTS (PROJECTS_CATALOG) — Use [Project: id]
+These are REAL completed installations. Use when asked about "work", "projects", "portfolio".
 ${JSON.stringify(projectList, null, 2)}
 
-## INSTRUCTIONAL VIDEOS (VIDEOS_CATALOG)
+## AVAILABLE PRODUCTS (IMAGE_CATALOG) — Use [Image: id]
+These are PATTERNS/PRODUCTS for sale. Use when asked about specific patterns or products.
+${JSON.stringify(imageList, null, 2)}
+
+## INSTRUCTIONAL VIDEOS (VIDEOS_CATALOG) — Use [Video: id]
 ${JSON.stringify(videoList, null, 2)}
 
 ## AI GENERATION
@@ -845,8 +875,44 @@ export default function MaraV15() {
   const [loading, setLoading] = useState(false);
   const [shownItems, setShownItems] = useState(new Set()); // Track what's been shown
 
+  // Gallery and Specs state
+  const [showGallery, setShowGallery] = useState(false);
+  const [specsImage, setSpecsImage] = useState(null);
+  const [heroImage, setHeroImage] = useState(null);
+  const [patternGallery, setPatternGallery] = useState([]);
+
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Group images by pattern for gallery
+  const getGalleryPatterns = () => {
+    const patterns = {};
+    IMAGE_CATALOG.forEach(img => {
+      if (!patterns[img.pattern]) patterns[img.pattern] = [];
+      patterns[img.pattern].push(img);
+    });
+    return patterns;
+  };
+
+  // Handle clicking an image to open specs page
+  const handleImageClick = (img) => {
+    setSpecsImage(img);
+    setHeroImage(img);
+    const related = IMAGE_CATALOG.filter(i => i.pattern === img.pattern && i.id !== img.id).slice(0, 4);
+    setPatternGallery(related);
+  };
+
+  // Swap hero image in specs page
+  const swapHeroImage = (img) => {
+    setHeroImage(img);
+  };
+
+  // Close specs page
+  const closeSpecs = () => {
+    setSpecsImage(null);
+    setHeroImage(null);
+    setPatternGallery([]);
+  };
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -973,6 +1039,15 @@ export default function MaraV15() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowGallery(true)}
+            className="flex items-center gap-2 px-3 py-2 bg-stone-900 hover:bg-stone-800 rounded-lg border border-stone-700 text-sm text-stone-300 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+            Browse All
+          </button>
           <button className="px-3 py-2 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 rounded-lg text-sm transition-colors">
             AI Generate
           </button>
@@ -980,24 +1055,25 @@ export default function MaraV15() {
       </header>
 
       {/* Messages Area */}
-      <main className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Welcome message if no messages */}
-        {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center mb-4">
-              <span className="text-2xl font-semibold text-stone-300">M</span>
+      <main className="flex-1 overflow-y-auto p-4">
+        <div className="max-w-3xl mx-auto space-y-4">
+          {/* Welcome message if no messages */}
+          {messages.length === 0 && (
+            <div className="flex flex-col items-center justify-center h-full text-center py-20">
+              <div className="w-16 h-16 bg-gradient-to-br from-stone-700 to-stone-800 rounded-full flex items-center justify-center mb-4">
+                <span className="text-2xl font-semibold text-stone-300">M</span>
+              </div>
+              <p className="text-stone-400 mb-2">Hey! I'm Mara from MR Walls.</p>
+              <p className="text-stone-500 text-sm max-w-md">
+                I help architects explore carved Corian surfaces. Ask me about patterns, projects, pricing, or just say what you're designing.
+              </p>
             </div>
-            <p className="text-stone-400 mb-2">Hey! I'm Mara from MR Walls.</p>
-            <p className="text-stone-500 text-sm max-w-md">
-              I help architects explore carved Corian surfaces. Ask me about patterns, projects, pricing, or just say what you're designing.
-            </p>
-          </div>
-        )}
+          )}
 
-        {/* Message list */}
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] ${msg.role === 'user' ? '' : 'space-y-3'}`}>
+          {/* Message list */}
+          {messages.map((msg, i) => (
+            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[85%] ${msg.role === 'user' ? '' : 'space-y-3'}`}>
 
               {/* Text bubble */}
               <div className={`rounded-2xl px-4 py-3 ${
@@ -1012,7 +1088,11 @@ export default function MaraV15() {
               {msg.images?.length > 0 && (
                 <div className="flex flex-wrap gap-3">
                   {msg.images.map((img, j) => (
-                    <div key={j} className="relative w-72 aspect-[4/3] rounded-xl overflow-hidden border border-stone-800">
+                    <button
+                      key={j}
+                      onClick={() => handleImageClick(img)}
+                      className="relative w-72 aspect-[4/3] rounded-xl overflow-hidden border border-stone-800 hover:border-stone-600 transition-all text-left"
+                    >
                       <img src={img.image} alt={img.title} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-3">
@@ -1029,7 +1109,7 @@ export default function MaraV15() {
                           Backlit
                         </div>
                       )}
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
@@ -1075,20 +1155,21 @@ export default function MaraV15() {
           </div>
         ))}
 
-        {/* Loading indicator */}
-        {loading && (
-          <div className="flex justify-start">
-            <div className="bg-stone-900 border border-stone-800 rounded-2xl px-4 py-3">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-stone-600 rounded-full animate-bounce" />
-                <span className="w-2 h-2 bg-stone-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-2 h-2 bg-stone-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          {/* Loading indicator */}
+          {loading && (
+            <div className="flex justify-start">
+              <div className="bg-stone-900 border border-stone-800 rounded-2xl px-4 py-3">
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 bg-stone-600 rounded-full animate-bounce" />
+                  <span className="w-2 h-2 bg-stone-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-2 h-2 bg-stone-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div ref={messagesEndRef} />
+          <div ref={messagesEndRef} />
+        </div>
       </main>
 
       {/* Input Area */}
@@ -1113,6 +1194,209 @@ export default function MaraV15() {
           </button>
         </div>
       </footer>
+
+      {/* GALLERY MODAL */}
+      {showGallery && (
+        <div className="fixed inset-0 bg-black/95 z-50 overflow-y-auto">
+          <div className="max-w-6xl mx-auto p-4">
+            <div className="flex items-center justify-between mb-6 sticky top-0 bg-black/80 backdrop-blur-sm py-4 -mx-4 px-4 z-10">
+              <div>
+                <h2 className="text-xl font-semibold text-stone-100">Full Collection</h2>
+                <p className="text-sm text-stone-500">{IMAGE_CATALOG.length} products • Tap to explore</p>
+              </div>
+              <button
+                onClick={() => setShowGallery(false)}
+                className="w-10 h-10 bg-stone-800 hover:bg-stone-700 rounded-full flex items-center justify-center text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            {Object.entries(getGalleryPatterns()).map(([pattern, images]) => (
+              <div key={pattern} className="mb-8">
+                <h3 className="text-sm font-medium text-stone-400 uppercase tracking-wide mb-3">{pattern}</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {images.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setShowGallery(false); handleImageClick(img); }}
+                      className="relative aspect-[4/3] rounded-lg overflow-hidden border border-stone-800 hover:border-stone-600 transition-all group text-left"
+                    >
+                      <img src={img.image} alt={img.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-2">
+                        <p className="text-xs font-medium text-white truncate">{img.title}</p>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          {img.corianColor && CORIAN_COLORS[img.corianColor] && (
+                            <div className="w-2 h-2 rounded-full border border-white/30" style={{ backgroundColor: CORIAN_COLORS[img.corianColor].hex }} />
+                          )}
+                          <span className="text-[10px] text-stone-400">{img.sector}</span>
+                          {img.isWaterFeature && <span className="text-[10px] text-blue-400 ml-1">Water</span>}
+                          {img.isBacklit && !img.isWaterFeature && <span className="text-[10px] text-amber-400 ml-1">Backlit</span>}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* PRODUCT SPECS PAGE */}
+      {specsImage && (
+        <div className="fixed inset-0 bg-black/95 z-50 overflow-y-auto" onClick={closeSpecs}>
+          <div className="min-h-full flex flex-col">
+            {/* Header */}
+            <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-black/80 backdrop-blur-sm">
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowGallery(true); closeSpecs(); }}
+                className="flex items-center gap-2 px-3 py-2 bg-stone-800 hover:bg-stone-700 rounded-lg text-sm text-stone-300"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                Browse All
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); closeSpecs(); }}
+                className="w-10 h-10 bg-stone-800 hover:bg-stone-700 rounded-full flex items-center justify-center text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 max-w-3xl mx-auto w-full px-4 pb-8" onClick={(e) => e.stopPropagation()}>
+              {/* Hero Image */}
+              <div className="relative rounded-xl overflow-hidden mb-4 bg-stone-900">
+                <img
+                  src={heroImage?.image || specsImage.image}
+                  alt={heroImage?.title || specsImage.title}
+                  className="w-full h-auto object-contain"
+                />
+                {(heroImage || specsImage).isWaterFeature && (
+                  <div className="absolute top-4 left-4 bg-blue-400 text-black text-xs font-medium px-3 py-1 rounded-full">
+                    Water Feature
+                  </div>
+                )}
+                {(heroImage || specsImage).isBacklit && !(heroImage || specsImage).isWaterFeature && (
+                  <div className="absolute top-4 left-4 bg-amber-500 text-black text-xs font-medium px-3 py-1 rounded-full">
+                    Backlit
+                  </div>
+                )}
+              </div>
+
+              {/* Pattern Gallery - click to swap hero */}
+              {patternGallery.length > 0 && (
+                <div className="grid grid-cols-4 gap-2 mb-6">
+                  {patternGallery.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => swapHeroImage(img)}
+                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                        heroImage?.id === img.id ? 'border-amber-500' : 'border-stone-700 hover:border-stone-500'
+                      }`}
+                    >
+                      <img src={img.image} alt={img.title} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Title & Description */}
+              <div className="mb-6">
+                <h2 className="text-2xl font-semibold text-stone-100 mb-1">{heroImage?.title || specsImage.title}</h2>
+                <p className="text-sm text-stone-400 mb-4">{specsImage.pattern} • {heroImage?.sector || specsImage.sector}</p>
+                <p className="text-sm text-stone-300 leading-relaxed">{heroImage?.description || specsImage.description}</p>
+              </div>
+
+              {/* Specs Grid */}
+              <div className="bg-stone-900/50 border border-stone-800 rounded-xl p-5 mb-6">
+                <h3 className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-4">Specifications</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-stone-500 uppercase">Material</p>
+                    <p className="text-sm text-stone-200">{specsImage.specs.material}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-stone-500 uppercase">Color</p>
+                    <p className="text-sm text-stone-200">{specsImage.corianColor || specsImage.specs.color}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-stone-500 uppercase">Max Panel</p>
+                    <p className="text-sm text-stone-200">{specsImage.specs.maxPanel || 'Custom'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-stone-500 uppercase">Lead Time</p>
+                    <p className="text-sm text-stone-200">{specsImage.specs.leadTime || '4-8 Weeks'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-stone-500 uppercase">System</p>
+                    <p className="text-sm text-stone-200">{specsImage.specs.system}</p>
+                  </div>
+                  {specsImage.specs.enhancement && (
+                    <div>
+                      <p className="text-xs text-stone-500 uppercase">Enhancement</p>
+                      <p className="text-sm text-stone-200">{specsImage.specs.enhancement}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Pricing */}
+              <div className="bg-stone-900/50 border border-stone-800 rounded-xl p-5 mb-6">
+                <h3 className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-4">Pricing</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-stone-400">Base Panel</span>
+                    <span className="text-stone-200">${specsImage.specs.pricePerSF || 25}/SF</span>
+                  </div>
+                  {specsImage.isBacklit && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-stone-400">Backlighting</span>
+                      <span className="text-stone-200">+$15/SF</span>
+                    </div>
+                  )}
+                  {specsImage.isWaterFeature && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-stone-400">Water Feature</span>
+                      <span className="text-stone-200">+$20/SF</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Backlight Info */}
+              {specsImage.isBacklit && (
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-5 mb-6">
+                  <h3 className="text-xs font-medium text-amber-400 uppercase tracking-wider mb-3">Backlight Package Includes</h3>
+                  <p className="text-sm text-stone-300 leading-relaxed">
+                    LED strips, drivers, power supplies, shop drawings, and custom lighting diagram. Turnkey system with remote control.
+                  </p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => alert('Quote request feature coming soon!')}
+                  className="flex-1 py-4 bg-stone-800 hover:bg-stone-700 rounded-xl font-medium text-sm border border-stone-700 transition-colors"
+                >
+                  Request Quote
+                </button>
+                <button
+                  onClick={() => alert('Added to inquiry! Feature coming soon.')}
+                  className="flex-1 py-4 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-medium text-sm transition-colors"
+                >
+                  Add to Inquiry
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
