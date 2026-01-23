@@ -139,7 +139,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['industrial', 'brick', 'carbon', 'concrete', 'dark', 'grey', 'gray', 'aviation', 'airport'],
     image: `${CLOUDINARY_BASE}/Carbon_Concrete-industrial_vxloqv.png`,
-    specs: { material: 'DuPont Corian®', color: 'Carbon Concrete', maxPanel: '144" × 60"', leadTime: '6-10 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Carbon Concrete', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
     description: 'Industrial Brick in Carbon Concrete — dark shale grey. The texture pops against the dark background.'
   },
   {
@@ -153,7 +153,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['industrial', 'brick', 'dove', 'grey', 'gray', 'warm', 'soft', 'aviation'],
     image: `${CLOUDINARY_BASE}/Dove_industrial_w6jvlx.png`,
-    specs: { material: 'DuPont Corian®', color: 'Dove', maxPanel: '144" × 60"', leadTime: '6-10 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Dove', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
     description: 'Industrial Brick in Dove — soft warm grey. Versatile, inviting, works anywhere.'
   },
   {
@@ -167,7 +167,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['industrial', 'brick', 'neutral', 'concrete', 'light', 'grey', 'gray', 'aviation'],
     image: `${CLOUDINARY_BASE}/Neautral_concrete-industrial_v7gbel.png`,
-    specs: { material: 'DuPont Corian®', color: 'Neutral Concrete', maxPanel: '144" × 60"', leadTime: '6-10 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Neutral Concrete', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
     description: 'Industrial Brick in Neutral Concrete — reads as honest material. Architects love it.'
   },
   {
@@ -181,7 +181,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['industrial', 'brick', 'artista', 'mist', 'grey', 'gray', 'subtle', 'aviation'],
     image: `${CLOUDINARY_BASE}/Artista_Mist_Industrial_zfaemp.png`,
-    specs: { material: 'DuPont Corian®', color: 'Artista Mist', maxPanel: '144" × 60"', leadTime: '6-10 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Artista Mist', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
     description: 'Industrial Brick in Artista Mist — subtle movement in the surface.'
   },
   {
@@ -195,7 +195,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['industrial', 'brick', 'laguna', 'blue', 'deep', 'bold', 'statement', 'aviation', 'branding'],
     image: `${CLOUDINARY_BASE}/Laguna-blue-industrial_ksz6w7.png`,
-    specs: { material: 'DuPont Corian®', color: 'Laguna', maxPanel: '144" × 60"', leadTime: '6-10 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Laguna', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
     description: 'Industrial Brick in Laguna — bold deep blue. Makes a real statement.'
   },
   {
@@ -209,7 +209,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['industrial', 'brick', 'verdant', 'green', 'teal', 'nature', 'calming', 'aviation'],
     image: `${CLOUDINARY_BASE}/Verdant_Industrial_bmkodk.png`,
-    specs: { material: 'DuPont Corian®', color: 'Verdant', maxPanel: '144" × 60"', leadTime: '6-10 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Verdant', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 25, system: 'InterlockPanel™' },
     description: 'Industrial Brick in Verdant — brings nature in. The deep teal is surprisingly calming.'
   },
 
@@ -225,7 +225,7 @@ const IMAGE_CATALOG = [
     isBacklit: true,
     keywords: ['lake', 'ripple', 'concentric', 'backlit', 'backlight', 'glow', 'zen', 'calm', 'meditation'],
     image: `${CLOUDINARY_BASE}/v1765939772/Lake_Backlight_Feature_Wall_with_Model_touch_bdzoxn.jpg`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 65, enhancement: 'Backlighting', system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 100, enhancement: 'Backlighting', system: 'InterlockPanel™' },
     description: 'Lake pattern — concentric ripples radiating outward like a stone dropped in still water. Backlit for ethereal glow.'
   },
 
@@ -241,7 +241,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['soldier', 'exterior', 'facade', 'siding', 'veterans', 'hospital', 'VA', 'blue', 'outdoor', 'cladding'],
     image: `${CLOUDINARY_BASE}/v1765771518/blue_-facade-_soldier-VA_-_Large_rc45wv.png`,
-    specs: { material: 'DuPont Corian®', color: 'Blue', maxPanel: '12" × 12"', leadTime: '4 Weeks', pricePerSF: 45, system: 'Fins' },
+    specs: { material: 'DuPont Corian®', color: 'Blue', maxPanel: '12" × 12"', leadTime: '4-6 Weeks', pricePerSF: 45, system: 'Fins' },
     description: 'Soldier pattern — bold blue exterior facade panels. Perfect for Veterans Hospital and healthcare facilities.'
   },
 
@@ -256,7 +256,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['seattle', 'tile', 'modular', 'healthcare', 'hospital', 'corridor'],
     image: `${CLOUDINARY_BASE}/Seattle-V2-tile-02_bvcqwc.png`,
-    specs: { material: 'DuPont Corian®', color: 'Mixed (Dove + Glacier White)', maxPanel: '24" × 24" tiles', leadTime: '4 Weeks', pricePerSF: 35, system: 'Modular Tile' },
+    specs: { material: 'DuPont Corian®', color: 'Mixed (Dove + Glacier White)', maxPanel: '24" × 24" tiles', leadTime: '4-6 Weeks', pricePerSF: 35, system: 'Modular Tile' },
     description: 'Seattle modular tiles — alternating carved wave and flat panels. Perfect for healthcare.'
   },
 
@@ -271,7 +271,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['great wave', 'wave', 'ocean', 'japanese', 'hokusai', 'dramatic', 'artistic'],
     image: `${CLOUDINARY_BASE}/Great_Wave_banana_03_copy_herewl.png`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 48"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 48"', leadTime: '4-6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
     description: 'Great Wave — inspired by Hokusai. Dramatic, artistic statement piece.'
   },
   {
@@ -284,7 +284,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['great wave', 'shower', 'bathroom', 'residential', 'luxury', 'spa'],
     image: `${CLOUDINARY_BASE}/Lim_Great_Wave_shower_contrast_square_copy_yvkh08.jpg`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 48"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 48"', leadTime: '4-6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
     description: 'Great Wave in residential shower — seamless, no grout lines.'
   },
   {
@@ -297,7 +297,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['great wave', 'exterior', 'facade', 'outdoor', 'pool'],
     image: `${CLOUDINARY_BASE}/Great_Wave_banana_20_copy_abzou8.png`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 48"', leadTime: '8 Weeks', pricePerSF: 65, enhancement: 'UV-Stable Exterior', system: 'French Cleat' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 48"', leadTime: '4-6 Weeks', pricePerSF: 100, enhancement: 'UV-Stable Exterior', system: 'French Cleat' },
     description: 'Great Wave on exterior facade — UV-stable formulation handles full sun.'
   },
   {
@@ -310,7 +310,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['great wave', 'restaurant', 'hospitality', 'dining', 'feature wall'],
     image: `${CLOUDINARY_BASE}/Great_Wave_banana_09_copy_lcqfa0.png`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 48"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 48"', leadTime: '4-6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
     description: 'Great Wave as restaurant feature wall — photographs beautifully.'
   },
   {
@@ -323,7 +323,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['great wave', 'lobby', 'corporate', 'reception', 'feature wall'],
     image: `${CLOUDINARY_BASE}/Great_Wave_banana_16_copy_ojsshm.png`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 48"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 48"', leadTime: '4-6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
     description: 'Great Wave in corporate lobby — makes a statement about creativity.'
   },
 
@@ -339,7 +339,7 @@ const IMAGE_CATALOG = [
     isWaterFeature: true,
     keywords: ['brick', 'water', 'fountain', 'pool', 'waterfall', 'outdoor', 'black'],
     image: `${CLOUDINARY_BASE}/Brick_waterfeature_05_copy_kewkyh.png`,
-    specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 85, enhancement: 'Water Feature', system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 85, enhancement: 'Water Feature', system: 'InterlockPanel™' },
     description: 'Brick pattern water feature in black — carved lines channel water into waterfalls.'
   },
   {
@@ -353,7 +353,7 @@ const IMAGE_CATALOG = [
     isWaterFeature: true,
     keywords: ['brick', 'water', 'pool', 'outdoor', 'cabana', 'resort', 'black'],
     image: `${CLOUDINARY_BASE}/Brick_waterfeature_18_copy_oce67r.png`,
-    specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 85, enhancement: 'Water Feature', system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 85, enhancement: 'Water Feature', system: 'InterlockPanel™' },
     description: 'Monumental Brick water feature in black anchoring resort-style pool.'
   },
   {
@@ -367,7 +367,7 @@ const IMAGE_CATALOG = [
     isWaterFeature: true,
     keywords: ['brick', 'water', 'backlit', 'backlight', 'glow', 'night', 'dramatic', 'white'],
     image: `${CLOUDINARY_BASE}/Brick_waterfeature_20_copy_ffh4px.png`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '10 Weeks', pricePerSF: 120, enhancement: 'Backlit + Water Feature', system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 120, enhancement: 'Backlit + Water Feature', system: 'InterlockPanel™' },
     description: 'Brick with backlighting AND water — light glows through carved channels.'
   },
   {
@@ -381,7 +381,7 @@ const IMAGE_CATALOG = [
     isWaterFeature: true,
     keywords: ['brick', 'water', 'night', 'evening', 'black', 'ambient'],
     image: `${CLOUDINARY_BASE}/Brick_waterfeature_27_copy_nxcqhx.png`,
-    specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 85, enhancement: 'Water Feature', system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 85, enhancement: 'Water Feature', system: 'InterlockPanel™' },
     description: 'Brick water feature at night — uplighting catches the spray.'
   },
   {
@@ -395,7 +395,7 @@ const IMAGE_CATALOG = [
     isWaterFeature: true,
     keywords: ['brick', 'water', 'day', 'daylight', 'natural', 'pool', 'black'],
     image: `${CLOUDINARY_BASE}/Brick_waterfeature_12_copy_gdmjok.png`,
-    specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 85, enhancement: 'Water Feature', system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 85, enhancement: 'Water Feature', system: 'InterlockPanel™' },
     description: 'Brick water feature in bright daylight — texture catches sun.'
   },
 
@@ -410,7 +410,7 @@ const IMAGE_CATALOG = [
     isBacklit: true,
     keywords: ['buddha', 'zen', 'meditation', 'spiritual', 'calm', 'spa', 'wellness', 'backlit', 'backlight', 'glow'],
     image: `${CLOUDINARY_BASE}/spa-_Buddha_2_zid08z.png`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 75, enhancement: 'Backlighting', system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 75, enhancement: 'Backlighting', system: 'InterlockPanel™' },
     description: 'Buddha mandala — custom carved with intricate detail. Backlit for ethereal glow.'
   },
   {
@@ -423,7 +423,7 @@ const IMAGE_CATALOG = [
     isBacklit: true,
     keywords: ['buddha', 'restaurant', 'asian', 'zen', 'dining', 'backlit', 'backlight'],
     image: `${CLOUDINARY_BASE}/Spa_Buddha_restaurant_yybtdi.png`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 75, enhancement: 'Backlighting', system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 75, enhancement: 'Backlighting', system: 'InterlockPanel™' },
     description: 'Buddha in restaurant setting — warm backlighting sets the mood.'
   },
 
@@ -438,7 +438,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['marilyn', 'portrait', 'hollywood', 'custom', 'branding', 'art', 'celebrity'],
     image: `${CLOUDINARY_BASE}/Marilynn_sm_copy_gcvzcb.jpg`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 85, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 85, system: 'InterlockPanel™' },
     description: 'Custom Marilyn portrait — any image can be carved. Brand logos, celebrities, custom artwork.'
   },
   {
@@ -451,7 +451,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['marilyn', 'portrait', 'art', 'gallery', 'sculpture'],
     image: `${CLOUDINARY_BASE}/Maryilynn2_c71acw.png`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 85, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 85, system: 'InterlockPanel™' },
     description: 'Marilyn as gallery art piece — carved Corian bridges architecture and fine art.'
   },
 
@@ -466,7 +466,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['fins', 'exterior', 'facade', 'corporate', 'modern', 'dimensional'],
     image: `${CLOUDINARY_BASE}/Fins_exterior_white_gcccvq.jpg`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '120" × 60"', leadTime: '8 Weeks', pricePerSF: 75, enhancement: 'UV-Stable Exterior', system: 'French Cleat' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '120" × 60"', leadTime: '4-6 Weeks', pricePerSF: 75, enhancement: 'UV-Stable Exterior', system: 'French Cleat' },
     description: 'Fins pattern on exterior facade — dimensional fins create deep shadow lines.'
   },
   {
@@ -479,7 +479,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['fins', 'exterior', 'patio', 'restaurant', 'outdoor', 'dining'],
     image: `${CLOUDINARY_BASE}/Fins_exterior2_lh1vlw.jpg`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '120" × 60"', leadTime: '8 Weeks', pricePerSF: 75, enhancement: 'UV-Stable Exterior', system: 'French Cleat' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '120" × 60"', leadTime: '4-6 Weeks', pricePerSF: 75, enhancement: 'UV-Stable Exterior', system: 'French Cleat' },
     description: 'Fins on restaurant patio — architectural backdrop for outdoor dining.'
   },
 
@@ -494,7 +494,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['flame', 'fire', 'warm', 'organic', 'flowing', 'vertical'],
     image: `${CLOUDINARY_BASE}/Flame-_qle4y3.jpg`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
     description: 'Flame pattern — flowing vertical waves that interweave. Warm, organic, dynamic.'
   },
   {
@@ -507,7 +507,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['flame', 'bedroom', 'headboard', 'residential', 'luxury', 'warm'],
     image: `${CLOUDINARY_BASE}/Flamebed_yggqrp.jpg`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
     description: 'Flame as headboard wall — warm, inviting, perfect for primary bedroom.'
   },
   {
@@ -520,7 +520,7 @@ const IMAGE_CATALOG = [
     isBacklit: true,
     keywords: ['flame', 'pink', 'rgb', 'backlit', 'backlight', 'bedroom', 'romantic', 'glow'],
     image: `${CLOUDINARY_BASE}/Flame_pink_obxnpm.jpg`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '8 Weeks', pricePerSF: 65, enhancement: 'RGB Backlighting', system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 100, enhancement: 'RGB Backlighting', system: 'InterlockPanel™' },
     description: 'Flame with pink RGB backlighting — dramatic, romantic atmosphere.'
   },
   {
@@ -533,7 +533,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['flame', 'lobby', 'feature', 'hospitality', 'hotel'],
     image: `${CLOUDINARY_BASE}/Flames_qthl01.jpg`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 50, system: 'InterlockPanel™' },
     description: 'Flame in hospitality lobby — vertical movement draws the eye up.'
   },
 
@@ -548,7 +548,7 @@ const IMAGE_CATALOG = [
     isBacklit: true,
     keywords: ['desert', 'sunset', 'cactus', 'arizona', 'southwest', 'scottsdale', 'backlit', 'backlight'],
     image: `${CLOUDINARY_BASE}/v1768111216/mr-render-1767989995638_copy_vtszj0.png`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', height: '142"', width: '239¾"', slabs: 5, leadTime: '4 Weeks', pricePerSF: 35, enhancement: 'Backlighting', system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', height: '142"', width: '239¾"', slabs: 5, leadTime: '4-6 Weeks', pricePerSF: 35, enhancement: 'Backlighting', system: 'InterlockPanel™' },
     shopDrawing: `${CLOUDINARY_BASE}/v1768330379/shop_drawing-Cactus_rovjta.png`,
     description: 'Desert Sunset — saguaro cactus silhouettes against carved mountain ridges. Southwest hospitality.'
   },
@@ -562,7 +562,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['desert', 'sunset', 'mountain', 'landscape', 'southwest', 'warm'],
     image: `${CLOUDINARY_BASE}/v1768111216/mr-render-1767992780170_ufyyef.png`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4 Weeks', pricePerSF: 35, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 35, system: 'InterlockPanel™' },
     description: 'Desert Sunset variation — mountain ridges and desert sky.'
   },
   {
@@ -575,7 +575,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['desert', 'mountain', 'landscape', 'warm', 'orange', 'hospitality'],
     image: `${CLOUDINARY_BASE}/mr-render-1768082338412_copy_wqymkx.png`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4 Weeks', pricePerSF: 35, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 35, system: 'InterlockPanel™' },
     description: 'Desert mountain landscape — carved ridgelines evoke the Southwest.'
   },
   {
@@ -588,7 +588,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['desert', 'abstract', 'landscape', 'artistic'],
     image: `${CLOUDINARY_BASE}/mr-render-1767989272197_copy_eka0g1.png`,
-    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4 Weeks', pricePerSF: 35, system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 35, system: 'InterlockPanel™' },
     description: 'Desert Sunset abstract — simplified mountain forms.'
   },
 
@@ -603,7 +603,7 @@ const IMAGE_CATALOG = [
     isBacklit: false,
     keywords: ['sand dune', 'curved', 'black', 'column', 'dramatic', 'thermoformed'],
     image: `${CLOUDINARY_BASE}/Fins_Sandune_texture_Curved_black_m1vtil.png`,
-    specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '10 Weeks', pricePerSF: 95, enhancement: 'Thermoformed Curve', system: 'InterlockPanel™' },
+    specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 95, enhancement: 'Thermoformed Curve', system: 'InterlockPanel™' },
     description: 'Sand Dune pattern thermoformed into dramatic curved column.'
   }
 ];
@@ -737,11 +737,10 @@ MR Walls creates carved DuPont Corian solid surface wall panels. Exclusive North
 Team: Mario Romano (Founder), Carlo & Kamila (VP), Sawyer & Toni (Sales), Samanta (Innovation)
 
 ## PRICING (only discuss when asked)
-- Linear patterns: $25/SF
-- Custom patterns: $50/SF
-- Backlighting add-on: +$15/SF
-- Water feature add-on: +$20/SF
-- Lead time: 4-10 weeks depending on complexity
+- Linear Patterns (repeatable, like Industrial Brick): $25/SF
+- Ready Made Designs (sculptural, like Flame, Great Wave, Buddha, Cactus): $50/SF
+- Backlighting add-on: +$50/SF
+- Lead time: 4-6 weeks depending on complexity
 
 ## ⚠️ CRITICAL: CHOOSING THE RIGHT CATALOG ⚠️
 This is the MOST IMPORTANT rule. You must choose the correct catalog based on user intent:
