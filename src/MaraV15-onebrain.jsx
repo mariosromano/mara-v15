@@ -605,6 +605,70 @@ const IMAGE_CATALOG = [
     image: `${CLOUDINARY_BASE}/Fins_Sandune_texture_Curved_black_m1vtil.png`,
     specs: { material: 'DuPont Corian®', color: 'Deep Nocturne (Black)', maxPanel: '144" × 60"', leadTime: '4-6 Weeks', pricePerSF: 95, enhancement: 'Thermoformed Curve', system: 'InterlockPanel™' },
     description: 'Sand Dune pattern thermoformed into dramatic curved column.'
+  },
+
+  // FINGERPRINT
+  {
+    id: 'fingerprint-1',
+    pattern: 'Fingerprint',
+    patternFamily: 'Fingerprint',
+    title: 'Fingerprint',
+    sector: 'Corporate',
+    corianColor: 'Bone',
+    mood: ['organic', 'unique', 'sculptural'],
+    isBacklit: false,
+    keywords: ['fingerprint', 'organic', 'unique', 'identity', 'bone', 'large scale'],
+    image: `${CLOUDINARY_BASE}/v1769147366/Fingerprint_-_Large_udpxci.jpg`,
+    specs: { material: 'DuPont Corian®', color: 'Bone', size: '12\' H × 20\' W', leadTime: '4-6 Weeks', pricePerSF: 35, system: 'InterlockPanel™' },
+    description: 'Fingerprint — organic carved ridges create a unique, one-of-a-kind identity wall. 12 feet high by 20 feet wide.'
+  },
+
+  // BILLOW
+  {
+    id: 'billow-backlit-1',
+    pattern: 'Billow',
+    patternFamily: 'Billow',
+    title: 'Billow Backlit',
+    sector: 'Hospitality',
+    corianColor: 'Glacier White',
+    mood: ['soft', 'flowing', 'dramatic', 'glowing'],
+    isBacklit: true,
+    keywords: ['billow', 'backlit', 'backlight', 'flowing', 'soft', 'clouds', 'glow'],
+    image: `${CLOUDINARY_BASE}/v1769147362/billow-backlight_w4hjru.jpg`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', size: '20\' H × 12\' W', leadTime: '4-6 Weeks', pricePerSF: 100, enhancement: 'Backlighting', system: 'InterlockPanel™' },
+    description: 'Billow with backlighting — soft flowing forms glow dramatically. 20 feet tall by 12 feet wide.'
+  },
+
+  // HONEY
+  {
+    id: 'honey-backlit-1',
+    pattern: 'Honey',
+    patternFamily: 'Honey',
+    title: 'Honey Backlit',
+    sector: 'Hospitality',
+    corianColor: 'Glacier White',
+    mood: ['geometric', 'natural', 'warm', 'glowing'],
+    isBacklit: true,
+    keywords: ['honey', 'honeycomb', 'backlit', 'backlight', 'geometric', 'hexagon', 'glow'],
+    image: `${CLOUDINARY_BASE}/v1769147362/billow-backlight_w4hjru.jpg`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', size: '10\' H × 17\' W', leadTime: '4-6 Weeks', pricePerSF: 100, enhancement: 'Backlighting', system: 'InterlockPanel™' },
+    description: 'Honey with backlighting — honeycomb-inspired pattern glows warmly. 10 feet high by 17 feet wide.'
+  },
+
+  // BLOOM
+  {
+    id: 'bloom-backlit-1',
+    pattern: 'Bloom',
+    patternFamily: 'Bloom',
+    title: 'Bloom Backlit',
+    sector: 'Hospitality',
+    corianColor: 'Glacier White',
+    mood: ['organic', 'floral', 'artistic', 'glowing'],
+    isBacklit: true,
+    keywords: ['bloom', 'flower', 'floral', 'backlit', 'backlight', 'artistic', 'image processing', 'glow'],
+    image: `${CLOUDINARY_BASE}/v1769147350/Bloom-free_reo20n.jpg`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', size: '9\' H × 22\' W', leadTime: '4-6 Weeks', pricePerSF: 75, enhancement: 'Backlighting + Image Processing', system: 'InterlockPanel™' },
+    description: 'Bloom with backlighting — image-processed floral design includes all backlighting materials. 9 feet high by 22 feet wide.'
   }
 ];
 
