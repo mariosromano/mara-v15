@@ -1052,13 +1052,13 @@ export default function MaraV15() {
 
     if (!template) return null;
 
-    // Put trigger word at the BEGINNING for better LoRA activation
+    // Build the base prompt with pattern description
     const basePrompt = template
       .replace('{pattern}', lora.patternDescription)
       .replace('{backlight}', backlightPhrase);
 
-    // Trigger word first, then the scene description
-    const prompt = `${lora.trigger}, ${basePrompt}`;
+    // Trigger word at END of prompt (per FAL LoRA best practices)
+    const prompt = `${basePrompt}, ${lora.trigger}`;
 
     return prompt;
   };
@@ -1087,8 +1087,8 @@ export default function MaraV15() {
     });
 
     try {
-      // Submit the request
-      const submitResponse = await fetch('https://queue.fal.run/fal-ai/flux-lora', {
+      // Submit the request - CORRECT ENDPOINT: flux-2/lora
+      const submitResponse = await fetch('https://queue.fal.run/fal-ai/flux-2/lora', {
         method: 'POST',
         headers: {
           'Authorization': `Key ${FAL_API_KEY}`,
@@ -1098,14 +1098,14 @@ export default function MaraV15() {
           prompt: prompt,
           loras: [{
             path: lora.url,
-            scale: lora.scale * 1.2  // Boost scale slightly for stronger pattern
+            scale: lora.scale
           }],
           image_size: 'landscape_16_9',
           num_images: 1,
           enable_safety_checker: false,
           output_format: 'jpeg',
-          num_inference_steps: 32,  // More steps for better quality
-          guidance_scale: 4.0       // Slightly higher guidance
+          num_inference_steps: 28,
+          guidance_scale: 2.5
         })
       });
 
@@ -1159,7 +1159,7 @@ export default function MaraV15() {
     for (let i = 0; i < maxAttempts; i++) {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      const response = await fetch(`https://queue.fal.run/fal-ai/flux-lora/requests/${requestId}/status`, {
+      const response = await fetch(`https://queue.fal.run/fal-ai/flux-2/lora/requests/${requestId}/status`, {
         headers: {
           'Authorization': `Key ${FAL_API_KEY}`
         }
@@ -1169,7 +1169,7 @@ export default function MaraV15() {
 
       if (status.status === 'COMPLETED') {
         // Fetch the actual result
-        const resultResponse = await fetch(`https://queue.fal.run/fal-ai/flux-lora/requests/${requestId}`, {
+        const resultResponse = await fetch(`https://queue.fal.run/fal-ai/flux-2/lora/requests/${requestId}`, {
           headers: {
             'Authorization': `Key ${FAL_API_KEY}`
           }
