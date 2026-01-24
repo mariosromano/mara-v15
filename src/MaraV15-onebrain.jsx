@@ -669,6 +669,24 @@ const IMAGE_CATALOG = [
     image: `${CLOUDINARY_BASE}/v1769147350/Bloom-free_reo20n.jpg`,
     specs: { material: 'DuPont Corian®', color: 'Glacier White', size: '9\' H × 22\' W', leadTime: '4-6 Weeks', pricePerSF: 75, enhancement: 'Backlighting + Image Processing', system: 'InterlockPanel™' },
     description: 'Bloom with backlighting — image-processed floral design includes all backlighting materials. 9 feet high by 22 feet wide.'
+  },
+
+  // FLAME 2-SHEET
+  {
+    id: 'flame-2sheet-1',
+    pattern: 'Flame',
+    patternFamily: 'Flame',
+    title: 'Flame 2-Sheet',
+    sector: 'Hospitality',
+    corianColor: 'Glacier White',
+    mood: ['warm', 'flowing', 'dramatic', 'sculptural'],
+    isBacklit: false,
+    keywords: ['flame', 'flowing', 'vertical', 'hospitality', 'white', '2 sheet', 'two sheet'],
+    image: `${CLOUDINARY_BASE}/v1769212741/flame-hospitality_h9crvd.png`,
+    additionalImages: [`${CLOUDINARY_BASE}/v1769212741/Flame-2_sheet_render_fdry5m.png`],
+    shopDrawing: `${CLOUDINARY_BASE}/v1769212741/Flame_-_2_Sheet_-_Shop_Drawing_tvlpb1.pdf`,
+    specs: { material: 'DuPont Corian®', color: 'Glacier White', size: '12\' H × 8\' W', sqft: 96, leadTime: '4-6 Weeks', pricePerSF: 35, totalPrice: 3360, system: 'InterlockPanel™' },
+    description: 'Flame 2-Sheet — flowing vertical waves in white Corian. 12 feet high by 8 feet wide. Shop drawings available.'
   }
 ];
 
