@@ -22,7 +22,7 @@ const LORA_MODELS = {
     scale: 1.0,
     hasBacklight: true,
     description: 'Concentric ripples radiating outward',
-    patternDescription: 'carved white Corian horizontal wave ridges'
+    patternDescription: 'monumental floor to ceiling backlit feature wall with carved white Corian horizontal wave ridges'
   },
   flame: {
     name: 'Flame',
@@ -31,7 +31,7 @@ const LORA_MODELS = {
     scale: 1.3,
     hasBacklight: true,
     description: 'Flowing vertical waves that interweave',
-    patternDescription: 'carved white Corian flowing vertical waves interweaving'
+    patternDescription: 'monumental floor to ceiling feature wall with carved white Corian flowing vertical interweaving waves'
   },
   fins: {
     name: 'Fins',
@@ -40,7 +40,7 @@ const LORA_MODELS = {
     scale: 1.0,
     hasBacklight: false,
     description: 'Diamond chevron fins with parallel ridges',
-    patternDescription: 'carved white Corian diamond chevron fins'
+    patternDescription: 'monumental floor to ceiling feature wall with carved white Corian diamond chevron fins'
   }
 };
 
@@ -1097,8 +1097,8 @@ export default function MaraV15() {
     }
 
     try {
-      // Use synchronous endpoint (fal.run) - returns result directly, no polling needed
-      const submitResponse = await fetch('https://fal.run/fal-ai/flux-lora', {
+      // Use synchronous endpoint (fal.run) with flux-2/lora model
+      const submitResponse = await fetch('https://fal.run/fal-ai/flux-2/lora', {
         method: 'POST',
         headers: {
           'Authorization': `Key ${FAL_API_KEY}`,
