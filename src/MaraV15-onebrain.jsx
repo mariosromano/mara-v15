@@ -1097,8 +1097,8 @@ export default function MaraV15() {
     }
 
     try {
-      // Submit the request - CORRECT ENDPOINT: flux-2/lora
-      const submitResponse = await fetch('https://queue.fal.run/fal-ai/flux-2/lora', {
+      // Use synchronous endpoint (fal.run) - returns result directly, no polling needed
+      const submitResponse = await fetch('https://fal.run/fal-ai/flux-lora', {
         method: 'POST',
         headers: {
           'Authorization': `Key ${FAL_API_KEY}`,
@@ -1120,12 +1120,14 @@ export default function MaraV15() {
       });
 
       if (!submitResponse.ok) {
-        throw new Error(`FAL API error: ${submitResponse.status}`);
+        const errorData = await submitResponse.json().catch(() => ({}));
+        throw new Error(`FAL API error: ${submitResponse.status} - ${errorData.detail || 'Unknown error'}`);
       }
 
       const result = await submitResponse.json();
+      console.log('FAL result:', result);
 
-      // Check if we got images directly or need to poll
+      // Synchronous endpoint returns images directly
       if (result.images && result.images.length > 0) {
         setGenResult({
           url: result.images[0].url,
@@ -1136,24 +1138,8 @@ export default function MaraV15() {
           backlight: genBacklight ? BACKLIGHT_COLORS[genBacklight].name : 'None'
         });
         setGenStep(6);
-      } else if (result.request_id) {
-        // Poll for result
-        const pollResult = await pollForResult(result.request_id);
-        if (pollResult.images && pollResult.images.length > 0) {
-          setGenResult({
-            url: pollResult.images[0].url,
-            prompt: prompt,
-            pattern: lora.name,
-            sector: SECTORS[genSector].name,
-            application: genApplication,
-            backlight: genBacklight ? BACKLIGHT_COLORS[genBacklight].name : 'None'
-          });
-          setGenStep(6);
-        } else {
-          throw new Error('No images in result');
-        }
       } else {
-        throw new Error('Unexpected response format');
+        throw new Error('No images in result');
       }
     } catch (err) {
       console.error('Generate error:', err);
