@@ -3,144 +3,205 @@
 ## What is Mara?
 Mara is an AI design assistant for MR Walls - a company that creates carved DuPont Corian wall surfaces. Mara helps architects and designers explore patterns, visualize designs, and get project information through a conversational chat interface.
 
-## Current Architecture
+## Architecture: One Brain
+Claude API makes ALL decisions about what content to show. Local code just renders.
 
-### Three Data Catalogs
-
+### Key Files
 ```
-IMAGE_CATALOG      → Products (orderable patterns with specs, pricing)
-PROJECTS_CATALOG   → Portfolio (7 completed installations/case studies)
-VIDEOS_CATALOG     → Instructional content (2 videos)
+/src/MaraV15-onebrain.jsx  - Main component (all logic, catalogs, UI)
+/src/main.jsx              - Entry point
+/.env                      - API keys (VITE_ANTHROPIC_API_KEY, VITE_FAL_API_KEY)
+/CLAUDE.md                 - This file (project memory)
 ```
 
-**IMAGE_CATALOG (Products)** - ~40+ entries
-- Fields: id, pattern, patternFamily, title, sector, corianColor, mood[], isBacklit, keywords[], image, specs{}, description
-- Example patterns: Lake, Flame, Fins, Great Wave, Industrial Brick, Desert Sunset, Buddha Mandala, Nazare, Sand Dune
+---
 
-**PROJECTS_CATALOG (Portfolio)** - 7 entries
+## Three Data Catalogs
+
+### IMAGE_CATALOG (Products) - ~45 entries
+Orderable patterns with specs and pricing.
+- Fields: id, pattern, patternFamily, title, sector, corianColor, mood[], isBacklit, isWaterFeature, keywords[], image, additionalImages[], shopDrawing, specs{}, description
+- Key patterns: Lake, Flame, Fins, Great Wave, Industrial Brick, Desert Sunset, Buddha Mandala, Fingerprint, Billow, Honey, Bloom, Flame 2-Sheet
+
+### PROJECTS_CATALOG (Portfolio) - 3 entries
+Completed installations/case studies.
 - Fields: id, title, client, location, sector, patterns[], designer, year, isBacklit, keywords[], image, description
-- Projects:
-  1. Water Feature Miami
-  2. Capital One Arena (with Gensler)
-  3. Rainbow RGB Coral (RGB programmable)
-  4. Quantum Spa Cold Plunge
-  5. LA Kings/Crypto Arena (with Gensler)
-  6. Toll Brothers Lindley Facade
-  7. The Strand Stairway
+- Projects: LAX American Airlines, Morongo Casino, Capital One Arena
 
-**VIDEOS_CATALOG (Instructional)** - 2 entries
-- Fields: id, title, type (instructional/demo), description, keywords[], video, relatedProducts[]
-- Videos:
-  1. InterlockPanel Installation (how-to)
-  2. Water Feature Demo
+### VIDEOS_CATALOG (Instructional) - 2 entries
+- InterlockPanel Installation (how-to)
+- Water Feature Demo
 
-### Chat Logic Flow
+---
 
+## Pricing (Updated Jan 2025)
+| Type | Price |
+|------|-------|
+| Linear Patterns (Industrial Brick) | $25/SF |
+| Ready Made Designs (Flame, Great Wave, Buddha, Cactus) | $50/SF |
+| Backlighting add-on | +$50/SF |
+| Lead time | 4-6 weeks |
+
+---
+
+## System Prompt Tags
+Claude uses these tags to specify media:
+- `[Image: id]` - shows a product from IMAGE_CATALOG
+- `[Project: id]` - shows a project from PROJECTS_CATALOG
+- `[Video: id]` - shows a video from VIDEOS_CATALOG
+
+### Catalog Selection Rules
+- "your work", "projects", "portfolio" -> PROJECTS_CATALOG
+- Specific pattern names, "products" -> IMAGE_CATALOG
+- "installation", "how to" -> VIDEOS_CATALOG
+
+---
+
+## AI Generate Feature
+
+### FAL API Configuration
+```javascript
+Endpoint: https://fal.run/fal-ai/flux-2/lora
+Auth Header: Authorization: Key ${VITE_FAL_API_KEY}
 ```
-User Input
-    ↓
-1. Generate intent ("create my own") → Start AI generate flow
-2. Browse intent ("show me all") → Open gallery modal
-3. Follow-up ("yes", "more", "show me more projects") → Cycle through content
-4. Search catalogs:
-   - searchProjects(query)
-   - searchVideos(query)
-   - searchImages(query)
-5. Priority: Projects/Videos first → General questions (text-only) → Products
-6. Context-aware follow-up question (won't ask "backlit?" if already backlit)
+
+### LoRA Models
+| Model | Trigger | Scale | Status |
+|-------|---------|-------|--------|
+| Lake | `mrlake` | 1.0 | Production Ready |
+| Flame | `mrflame` | 1.3 | Internal only (~15 gens needed) |
+| Fins | `fnptrn` | 1.0 | Untested |
+
+### LoRA URLs
+```
+Lake:  https://v3.fal.media/files/b/0a87e361/Tc4UZShpbQ9FmneXxjoc4_pytorch_lora_weights.safetensors
+Flame: https://v3.fal.media/files/b/0a883628/Iyraeb6tJunafTQ8q_i5N_pytorch_lora_weights.safetensors
+Fins:  https://v3.fal.media/files/b/0a87f1e6/mBUGXAbUMaM1wWFhzhI9g_pytorch_lora_weights.safetensors
 ```
 
-### Context Tracking
-
-Each assistant message stores:
+### Generation Parameters
 ```javascript
 {
-  role: 'assistant',
-  text: '...',
-  image: {...} | null,           // Product from IMAGE_CATALOG
-  project: {...} | null,         // Project from PROJECTS_CATALOG
-  video: {...} | null,           // Video from VIDEOS_CATALOG
-  contentType: 'project' | 'video' | null,
-  projectIndex: 0-6,             // For cycling through projects
-  videoIndex: 0-1,               // For cycling through videos
-  allMatches: [...]              // For "show more" on products
+  image_size: 'landscape_16_9',
+  num_images: 1,
+  output_format: 'jpeg',
+  guidance_scale: 2.5,
+  num_inference_steps: 28,
+  enable_safety_checker: false
 }
 ```
 
-### Key Behaviors
+### Prompt Best Practices
+- Pattern description must include "carved white Corian" prominently
+- Trigger word at END of prompt
+- Include lighting type (backlit, grazing, natural)
+- Add photography style ("architectural photography", "shot on Sony A7R IV")
 
-| User says | System does |
-|-----------|-------------|
-| "show me lake pattern" | Shows Lake product |
-| "show me your projects" | Shows project from PROJECTS_CATALOG |
-| "show me more projects" | Cycles to next project |
-| "how does installation work?" | Shows video |
-| "yes" / "more" | Shows next item of same type |
-| "what's your company name?" | Text-only response (no image) |
-| Random query, no match | Random diverse products |
+---
 
-### System Prompt Tags
+## UI Features
 
-Mara's system prompt tells Claude to use:
-- `[Image: id]` for products
-- `[Project: id]` for portfolio
-- `[Video: id]` for instructional content
+### Chat
+- Centered layout (max-w-3xl)
+- Auto-focus input after messages
+- Clickable images open specs page
 
-Local search functions serve as fallbacks when Claude doesn't use tags.
+### Gallery Modal (Browse All)
+- Grid of all products grouped by pattern family
+- Click to open product specs
 
-## Known Architecture Issue: Two Brains
+### Product Specs Page
+- Hero image with pattern gallery (supports additionalImages)
+- Specifications grid
+- Pricing section
+- Shop drawing download (if available)
+- Request Quote / Add to Inquiry buttons
 
-Currently there are TWO decision-making systems that can conflict:
+### AI Generate Modal
+- Step-by-step: Pattern -> Sector -> Application -> Backlight -> Generate
+- Progress dots indicator
+- Download and "Generate Another" buttons
 
-**Brain 1: Claude (API)**
-- Generates conversational text
-- Uses tags to specify media
-- Doesn't know what was actually shown to user
+---
 
-**Brain 2: Local JavaScript**
-- searchImages(), searchProjects(), searchVideos()
-- Follow-up logic ("yes" → show next)
-- Context tracking
+## Environment Variables
 
-**The conflict:** Claude might ask "see it backlit?" when local system already showed backlit image. User says "yes" and local system decides what to show, but Claude doesn't know.
-
-### Future Consideration: Unify to One Brain
-
-**Option A: Claude-First**
-- Claude makes ALL decisions
-- Pass full context of what was shown
-- Claude returns structured JSON with media choices
-- Local system only renders
-
-**Option B: Local-First**
-- Claude only generates text
-- All media decisions rule-based
-- Faster but less intelligent
-
-**Option C: Better Handoff**
-- Keep both but sync context
-- Tell Claude what was shown
-- Claude informs local logic
-
-## File Structure
-
+### Local (.env)
 ```
-/src/MaraV15.jsx    - Main component (all logic, catalogs, UI)
-/.env               - VITE_ANTHROPIC_API_KEY for Claude API
-/CLAUDE.md          - This file (project memory)
+VITE_ANTHROPIC_API_KEY=sk-ant-api03-...
+VITE_FAL_API_KEY=3e417ede-cd4b-4b81-8116-...
 ```
+
+### Vercel
+Same variables in Project Settings -> Environment Variables
+Remember to Redeploy after changing env vars!
+
+---
+
+## Deployment
+- **Repo:** github.com/mariosromano/mara-v15
+- **Branch:** main
+- **Hosting:** Vercel (auto-deploys on push)
+- **URL:** https://mara-v15.vercel.app
+
+---
+
+## Git Branches
+- `main` - Production (One Brain architecture)
+- `one-brain` - Development branch
+- `two-brain-backup` - Old architecture backup
+
+---
+
+## Cloudinary
+
+### Image URLs
+```
+Base: https://res.cloudinary.com/dtlodxxio/image/upload/
+```
+
+### PDF Downloads
+Use `raw/upload` for downloadable PDFs:
+```
+https://res.cloudinary.com/dtlodxxio/raw/upload/filename.pdf
+```
+
+Enable "Allow delivery of PDF and ZIP files" in Cloudinary Security settings.
+
+---
+
+## Common Issues & Fixes
+
+### "Failed to fetch" on AI Generate
+- Check VITE_FAL_API_KEY exists in Vercel env vars
+- Redeploy after adding env vars
+
+### CORS error on FAL API
+- Use synchronous endpoint `fal.run` not `queue.fal.run`
+- Polling endpoints have CORS restrictions
+
+### LoRA not showing in generated images
+- Ensure trigger word is at END of prompt
+- Use `flux-2/lora` endpoint (not `flux-lora`)
+- Pattern description must include "carved white Corian"
+
+### Claude showing products instead of projects
+- System prompt has CRITICAL section for catalog selection
+- PROJECTS_CATALOG listed before IMAGE_CATALOG in prompt
+
+---
 
 ## Recent Changes (Jan 2025)
 
-1. Created separate PROJECTS_CATALOG and VIDEOS_CATALOG (was all in IMAGE_CATALOG)
-2. Added project/video cycling with "yes" / "show me more"
-3. Fixed: No longer asks "backlit?" for already-backlit images
-4. Fixed: Projects/videos don't fall through to product logic
-5. Fixed: Removed Buddha as default fallback (now random diverse)
-6. Increased chat image sizes by 20%
-7. Added download button for AI-generated images
+1. Migrated from Two-Brain to One-Brain architecture
+2. Added AI Generate feature with FAL LoRA integration
+3. Added Gallery Modal (Browse All)
+4. Added Product Specs Page with shop drawing downloads
+5. Added new products: Fingerprint, Billow, Honey, Bloom, Flame 2-Sheet
+6. Updated pricing: Linear $25, Ready Made $50, Backlit +$50
+7. Fixed catalog selection (projects vs products)
+8. Centered chat layout
 
-## Git Branch
+---
 
-Main branch: `main`
-Deployed to: Vercel (mara-v15.vercel.app)
+*Last Updated: January 23, 2026*
