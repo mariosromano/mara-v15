@@ -671,11 +671,11 @@ const IMAGE_CATALOG = [
     description: 'Bloom with backlighting — image-processed floral design includes all backlighting materials. 9 feet high by 22 feet wide.'
   },
 
-  // FLAME 2-SHEET
+  // FLAME 2-SHEET (separate family)
   {
     id: 'flame-2sheet-1',
-    pattern: 'Flame',
-    patternFamily: 'Flame',
+    pattern: 'Flame 2-Sheet',
+    patternFamily: 'Flame 2-Sheet',
     title: 'Flame 2-Sheet',
     sector: 'Hospitality',
     corianColor: 'Glacier White',
@@ -979,8 +979,27 @@ export default function MaraV15() {
   const handleImageClick = (img) => {
     setSpecsImage(img);
     setHeroImage(img);
-    const related = IMAGE_CATALOG.filter(i => i.pattern === img.pattern && i.id !== img.id).slice(0, 4);
-    setPatternGallery(related);
+
+    // Build gallery: start with current image, add additionalImages, then related products
+    let gallery = [img];
+
+    // Add additionalImages as clickable gallery items
+    if (img.additionalImages?.length > 0) {
+      img.additionalImages.forEach((imgUrl, idx) => {
+        gallery.push({
+          ...img,
+          id: `${img.id}-additional-${idx}`,
+          image: imgUrl,
+          title: `${img.title} - View ${idx + 2}`
+        });
+      });
+    }
+
+    // Add other products with same pattern (if any)
+    const related = IMAGE_CATALOG.filter(i => i.pattern === img.pattern && i.id !== img.id).slice(0, 4 - gallery.length);
+    gallery = [...gallery, ...related].slice(0, 4);
+
+    setPatternGallery(gallery);
   };
 
   // Swap hero image in specs page
@@ -1408,8 +1427,8 @@ export default function MaraV15() {
                     <p className="text-sm text-stone-200">{specsImage.corianColor || specsImage.specs.color}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-stone-500 uppercase">Max Panel</p>
-                    <p className="text-sm text-stone-200">{specsImage.specs.maxPanel || 'Custom'}</p>
+                    <p className="text-xs text-stone-500 uppercase">{specsImage.specs.size ? 'Size' : 'Max Panel'}</p>
+                    <p className="text-sm text-stone-200">{specsImage.specs.size || specsImage.specs.maxPanel || 'Custom'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-stone-500 uppercase">Lead Time</p>
@@ -1458,6 +1477,27 @@ export default function MaraV15() {
                   <p className="text-sm text-stone-300 leading-relaxed">
                     LED strips, drivers, power supplies, shop drawings, and custom lighting diagram. Turnkey system with remote control.
                   </p>
+                </div>
+              )}
+
+              {/* Shop Drawing Download */}
+              {specsImage.shopDrawing && (
+                <div className="bg-stone-900/50 border border-stone-800 rounded-xl p-5 mb-6">
+                  <h3 className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-3">Technical Documents</h3>
+                  <a
+                    href={specsImage.shopDrawing}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-4 py-3 bg-stone-800 hover:bg-stone-700 rounded-lg transition-colors"
+                  >
+                    <svg className="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <div>
+                      <p className="text-sm font-medium text-stone-200">Download Shop Drawing</p>
+                      <p className="text-xs text-stone-500">PDF with dimensions and panel layout</p>
+                    </div>
+                  </a>
                 </div>
               )}
 
