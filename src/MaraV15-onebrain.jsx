@@ -684,7 +684,7 @@ const IMAGE_CATALOG = [
     keywords: ['flame', 'flowing', 'vertical', 'hospitality', 'white', '2 sheet', 'two sheet'],
     image: `${CLOUDINARY_BASE}/v1769212741/flame-hospitality_h9crvd.png`,
     additionalImages: [`${CLOUDINARY_BASE}/v1769212741/Flame-2_sheet_render_fdry5m.png`],
-    shopDrawing: 'https://res.cloudinary.com/dtlodxxio/raw/upload/Flame_-_2_Sheet_-_Shop_Drawing_tvlpb1.pdf',
+    shopDrawing: 'https://res.cloudinary.com/dtlodxxio/raw/upload/v1769212741/Flame_-_2_Sheet_-_Shop_Drawing_tvlpb1.pdf',
     specs: { material: 'DuPont Corian®', color: 'Glacier White', size: '12\' H × 8\' W', sqft: 96, leadTime: '4-6 Weeks', pricePerSF: 35, totalPrice: 3360, system: 'InterlockPanel™' },
     description: 'Flame 2-Sheet — flowing vertical waves in white Corian. 12 feet high by 8 feet wide. Shop drawings available.'
   }
