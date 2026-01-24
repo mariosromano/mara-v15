@@ -1083,8 +1083,18 @@ export default function MaraV15() {
       trigger: lora.trigger,
       loraUrl: lora.url,
       scale: lora.scale,
-      prompt: prompt
+      prompt: prompt,
+      hasApiKey: !!FAL_API_KEY,
+      apiKeyLength: FAL_API_KEY?.length
     });
+
+    // Check if API key exists
+    if (!FAL_API_KEY) {
+      setGenError('FAL API key not configured. Check Vercel environment variables.');
+      setGenStep(4);
+      setGenLoading(false);
+      return;
+    }
 
     try {
       // Submit the request - CORRECT ENDPOINT: flux-2/lora
@@ -1147,7 +1157,12 @@ export default function MaraV15() {
       }
     } catch (err) {
       console.error('Generate error:', err);
-      setGenError(err.message || 'Failed to generate image');
+      // More detailed error message
+      let errorMsg = err.message || 'Failed to generate image';
+      if (err.message === 'Failed to fetch') {
+        errorMsg = 'Network error - check console for details. API key may be invalid or missing.';
+      }
+      setGenError(errorMsg);
       setGenStep(4); // Go back to last step
     } finally {
       setGenLoading(false);
