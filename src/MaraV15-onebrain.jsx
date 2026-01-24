@@ -962,6 +962,17 @@ export default function MaraV15() {
   const [heroImage, setHeroImage] = useState(null);
   const [patternGallery, setPatternGallery] = useState([]);
 
+  // AI Generate state
+  const [showGenerate, setShowGenerate] = useState(false);
+  const [genStep, setGenStep] = useState(1); // 1=pattern, 2=sector, 3=application, 4=backlight, 5=generating, 6=result
+  const [genPattern, setGenPattern] = useState(null);
+  const [genSector, setGenSector] = useState(null);
+  const [genApplication, setGenApplication] = useState(null);
+  const [genBacklight, setGenBacklight] = useState(null);
+  const [genLoading, setGenLoading] = useState(false);
+  const [genResult, setGenResult] = useState(null);
+  const [genError, setGenError] = useState(null);
+
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -1012,6 +1023,171 @@ export default function MaraV15() {
     setSpecsImage(null);
     setHeroImage(null);
     setPatternGallery([]);
+  };
+
+  // Reset AI Generate modal
+  const resetGenerate = () => {
+    setGenStep(1);
+    setGenPattern(null);
+    setGenSector(null);
+    setGenApplication(null);
+    setGenBacklight(null);
+    setGenResult(null);
+    setGenError(null);
+    setGenLoading(false);
+  };
+
+  // Close AI Generate modal
+  const closeGenerate = () => {
+    setShowGenerate(false);
+    resetGenerate();
+  };
+
+  // Build the prompt for FAL
+  const buildGeneratePrompt = () => {
+    const lora = LORA_MODELS[genPattern];
+    const sectorKey = genSector;
+    const template = PROMPT_TEMPLATES[sectorKey]?.[genApplication];
+    const backlightPhrase = genBacklight ? BACKLIGHT_COLORS[genBacklight].phrase : 'soft ambient lighting';
+
+    if (!template) return null;
+
+    const prompt = template
+      .replace('{pattern}', `${lora.trigger} ${lora.patternDescription}`)
+      .replace('{backlight}', backlightPhrase);
+
+    return prompt;
+  };
+
+  // Call FAL API to generate image
+  const generateImage = async () => {
+    setGenLoading(true);
+    setGenError(null);
+    setGenStep(5);
+
+    const lora = LORA_MODELS[genPattern];
+    const prompt = buildGeneratePrompt();
+
+    if (!prompt) {
+      setGenError('Could not build prompt');
+      setGenLoading(false);
+      return;
+    }
+
+    try {
+      // Submit the request
+      const submitResponse = await fetch('https://queue.fal.run/fal-ai/flux-lora', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Key ${FAL_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          prompt: prompt,
+          loras: [{
+            path: lora.url,
+            scale: lora.scale
+          }],
+          image_size: 'landscape_16_9',
+          num_images: 1,
+          enable_safety_checker: false,
+          output_format: 'jpeg',
+          num_inference_steps: 28,
+          guidance_scale: 3.5
+        })
+      });
+
+      if (!submitResponse.ok) {
+        throw new Error(`FAL API error: ${submitResponse.status}`);
+      }
+
+      const result = await submitResponse.json();
+
+      // Check if we got images directly or need to poll
+      if (result.images && result.images.length > 0) {
+        setGenResult({
+          url: result.images[0].url,
+          prompt: prompt,
+          pattern: lora.name,
+          sector: SECTORS[genSector].name,
+          application: genApplication,
+          backlight: genBacklight ? BACKLIGHT_COLORS[genBacklight].name : 'None'
+        });
+        setGenStep(6);
+      } else if (result.request_id) {
+        // Poll for result
+        const pollResult = await pollForResult(result.request_id);
+        if (pollResult.images && pollResult.images.length > 0) {
+          setGenResult({
+            url: pollResult.images[0].url,
+            prompt: prompt,
+            pattern: lora.name,
+            sector: SECTORS[genSector].name,
+            application: genApplication,
+            backlight: genBacklight ? BACKLIGHT_COLORS[genBacklight].name : 'None'
+          });
+          setGenStep(6);
+        } else {
+          throw new Error('No images in result');
+        }
+      } else {
+        throw new Error('Unexpected response format');
+      }
+    } catch (err) {
+      console.error('Generate error:', err);
+      setGenError(err.message || 'Failed to generate image');
+      setGenStep(4); // Go back to last step
+    } finally {
+      setGenLoading(false);
+    }
+  };
+
+  // Poll for FAL result
+  const pollForResult = async (requestId, maxAttempts = 60) => {
+    for (let i = 0; i < maxAttempts; i++) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      const response = await fetch(`https://queue.fal.run/fal-ai/flux-lora/requests/${requestId}/status`, {
+        headers: {
+          'Authorization': `Key ${FAL_API_KEY}`
+        }
+      });
+
+      const status = await response.json();
+
+      if (status.status === 'COMPLETED') {
+        // Fetch the actual result
+        const resultResponse = await fetch(`https://queue.fal.run/fal-ai/flux-lora/requests/${requestId}`, {
+          headers: {
+            'Authorization': `Key ${FAL_API_KEY}`
+          }
+        });
+        return await resultResponse.json();
+      } else if (status.status === 'FAILED') {
+        throw new Error('Generation failed');
+      }
+    }
+    throw new Error('Generation timed out');
+  };
+
+  // Download generated image
+  const downloadGeneratedImage = async () => {
+    if (!genResult?.url) return;
+
+    try {
+      const response = await fetch(genResult.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mara-${genResult.pattern.toLowerCase()}-${genResult.application.toLowerCase().replace(/\s+/g, '-')}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download failed:', err);
+    }
   };
 
   // Auto-scroll to bottom and keep input focused
@@ -1150,7 +1326,10 @@ export default function MaraV15() {
             </svg>
             Browse All
           </button>
-          <button className="px-3 py-2 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 rounded-lg text-sm transition-colors">
+          <button
+            onClick={() => { resetGenerate(); setShowGenerate(true); }}
+            className="px-3 py-2 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 rounded-lg text-sm transition-colors"
+          >
             AI Generate
           </button>
         </div>
@@ -1516,6 +1695,242 @@ export default function MaraV15() {
                   Add to Inquiry
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI GENERATE MODAL */}
+      {showGenerate && (
+        <div className="fixed inset-0 bg-black/95 z-50 overflow-y-auto">
+          <div className="min-h-full flex flex-col">
+            {/* Header */}
+            <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-black/80 backdrop-blur-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-stone-100">AI Generate</h2>
+                  <p className="text-xs text-stone-500">Create custom visualizations</p>
+                </div>
+              </div>
+              <button
+                onClick={closeGenerate}
+                className="w-10 h-10 bg-stone-800 hover:bg-stone-700 rounded-full flex items-center justify-center text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 max-w-2xl mx-auto w-full px-4 pb-8">
+              {/* Progress indicator */}
+              <div className="flex items-center justify-center gap-2 my-6">
+                {[1, 2, 3, 4].map(step => (
+                  <div
+                    key={step}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      genStep >= step ? 'bg-amber-500' : 'bg-stone-700'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Step 1: Choose Pattern */}
+              {genStep === 1 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-stone-100 text-center mb-6">Choose a Pattern</h3>
+                  <div className="grid grid-cols-1 gap-3">
+                    {Object.entries(LORA_MODELS).map(([key, lora]) => (
+                      <button
+                        key={key}
+                        onClick={() => { setGenPattern(key); setGenStep(2); }}
+                        className="flex items-center gap-4 p-4 bg-stone-900 hover:bg-stone-800 border border-stone-700 hover:border-amber-500/50 rounded-xl transition-all text-left"
+                      >
+                        <div className="w-12 h-12 bg-stone-800 rounded-lg flex items-center justify-center text-2xl">
+                          {key === 'lake' && '🌊'}
+                          {key === 'flame' && '🔥'}
+                          {key === 'fins' && '◇'}
+                        </div>
+                        <div>
+                          <p className="font-medium text-stone-100">{lora.name}</p>
+                          <p className="text-sm text-stone-400">{lora.description}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Choose Sector */}
+              {genStep === 2 && (
+                <div className="space-y-4">
+                  <button onClick={() => setGenStep(1)} className="text-sm text-stone-500 hover:text-stone-300 mb-2">
+                    ← Back to patterns
+                  </button>
+                  <h3 className="text-lg font-medium text-stone-100 text-center mb-6">Choose a Sector</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {Object.entries(SECTORS).map(([key, sector]) => (
+                      <button
+                        key={key}
+                        onClick={() => { setGenSector(key); setGenStep(3); }}
+                        className="p-4 bg-stone-900 hover:bg-stone-800 border border-stone-700 hover:border-amber-500/50 rounded-xl transition-all text-left"
+                      >
+                        <p className="font-medium text-stone-100">{sector.name}</p>
+                        <p className="text-xs text-stone-500 mt-1">{sector.applications.length} applications</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Choose Application */}
+              {genStep === 3 && (
+                <div className="space-y-4">
+                  <button onClick={() => setGenStep(2)} className="text-sm text-stone-500 hover:text-stone-300 mb-2">
+                    ← Back to sectors
+                  </button>
+                  <h3 className="text-lg font-medium text-stone-100 text-center mb-6">Choose an Application</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {SECTORS[genSector]?.applications.map(app => (
+                      <button
+                        key={app}
+                        onClick={() => { setGenApplication(app); setGenStep(4); }}
+                        className="p-4 bg-stone-900 hover:bg-stone-800 border border-stone-700 hover:border-amber-500/50 rounded-xl transition-all text-left"
+                      >
+                        <p className="font-medium text-stone-100">{app}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 4: Choose Backlight Color */}
+              {genStep === 4 && (
+                <div className="space-y-4">
+                  <button onClick={() => setGenStep(3)} className="text-sm text-stone-500 hover:text-stone-300 mb-2">
+                    ← Back to applications
+                  </button>
+                  <h3 className="text-lg font-medium text-stone-100 text-center mb-2">Choose Backlight Color</h3>
+                  <p className="text-sm text-stone-500 text-center mb-6">Optional: adds dramatic glow effect</p>
+
+                  {genError && (
+                    <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm mb-4">
+                      {genError}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-3 gap-3 mb-6">
+                    {Object.entries(BACKLIGHT_COLORS).map(([key, color]) => (
+                      <button
+                        key={key}
+                        onClick={() => setGenBacklight(key)}
+                        className={`p-3 rounded-xl border transition-all ${
+                          genBacklight === key
+                            ? 'bg-amber-500/20 border-amber-500'
+                            : 'bg-stone-900 border-stone-700 hover:border-stone-500'
+                        }`}
+                      >
+                        <div
+                          className="w-full h-6 rounded mb-2"
+                          style={{
+                            background: key === 'warm' ? 'linear-gradient(90deg, #fbbf24, #f59e0b)' :
+                                        key === 'cool' ? 'linear-gradient(90deg, #f5f5f5, #e5e5e5)' :
+                                        key === 'pink' ? 'linear-gradient(90deg, #ec4899, #db2777)' :
+                                        key === 'blue' ? 'linear-gradient(90deg, #3b82f6, #2563eb)' :
+                                        key === 'cyan' ? 'linear-gradient(90deg, #06b6d4, #0891b2)' :
+                                        'linear-gradient(90deg, #a855f7, #9333ea)'
+                          }}
+                        />
+                        <p className="text-xs text-stone-300">{color.name}</p>
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => setGenBacklight(null)}
+                    className={`w-full p-3 rounded-xl border transition-all mb-6 ${
+                      genBacklight === null
+                        ? 'bg-stone-700/50 border-stone-500'
+                        : 'bg-stone-900 border-stone-700 hover:border-stone-500'
+                    }`}
+                  >
+                    <p className="text-sm text-stone-300">No backlight (ambient light only)</p>
+                  </button>
+
+                  {/* Summary */}
+                  <div className="bg-stone-900/50 border border-stone-800 rounded-xl p-4 mb-6">
+                    <p className="text-xs text-stone-500 uppercase mb-2">Your Selection</p>
+                    <p className="text-sm text-stone-300">
+                      <span className="text-amber-400">{LORA_MODELS[genPattern]?.name}</span> pattern in a{' '}
+                      <span className="text-amber-400">{SECTORS[genSector]?.name}</span>{' '}
+                      <span className="text-amber-400">{genApplication}</span>
+                      {genBacklight && <> with <span className="text-amber-400">{BACKLIGHT_COLORS[genBacklight]?.name}</span> backlighting</>}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={generateImage}
+                    disabled={genLoading}
+                    className="w-full py-4 bg-amber-500 hover:bg-amber-400 disabled:bg-amber-500/50 text-black font-medium rounded-xl transition-colors"
+                  >
+                    Generate Visualization
+                  </button>
+                </div>
+              )}
+
+              {/* Step 5: Generating */}
+              {genStep === 5 && (
+                <div className="flex flex-col items-center justify-center py-20">
+                  <div className="w-16 h-16 border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin mb-6" />
+                  <h3 className="text-lg font-medium text-stone-100 mb-2">Generating your visualization...</h3>
+                  <p className="text-sm text-stone-500">This usually takes 15-30 seconds</p>
+                </div>
+              )}
+
+              {/* Step 6: Result */}
+              {genStep === 6 && genResult && (
+                <div className="space-y-4">
+                  <div className="relative rounded-xl overflow-hidden bg-stone-900">
+                    <img
+                      src={genResult.url}
+                      alt="Generated visualization"
+                      className="w-full h-auto"
+                    />
+                  </div>
+
+                  <div className="bg-stone-900/50 border border-stone-800 rounded-xl p-4">
+                    <p className="text-xs text-stone-500 uppercase mb-2">Generated Design</p>
+                    <p className="text-sm text-stone-300">
+                      <span className="text-amber-400">{genResult.pattern}</span> in{' '}
+                      <span className="text-amber-400">{genResult.sector}</span>{' '}
+                      <span className="text-amber-400">{genResult.application}</span>
+                      {genResult.backlight !== 'None' && <> with <span className="text-amber-400">{genResult.backlight}</span> backlighting</>}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={downloadGeneratedImage}
+                      className="flex-1 py-4 bg-stone-800 hover:bg-stone-700 rounded-xl font-medium text-sm border border-stone-700 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      Download
+                    </button>
+                    <button
+                      onClick={resetGenerate}
+                      className="flex-1 py-4 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-medium text-sm transition-colors"
+                    >
+                      Generate Another
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
