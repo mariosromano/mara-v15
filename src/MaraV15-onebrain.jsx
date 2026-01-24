@@ -1052,9 +1052,13 @@ export default function MaraV15() {
 
     if (!template) return null;
 
-    const prompt = template
-      .replace('{pattern}', `${lora.trigger} ${lora.patternDescription}`)
+    // Put trigger word at the BEGINNING for better LoRA activation
+    const basePrompt = template
+      .replace('{pattern}', lora.patternDescription)
       .replace('{backlight}', backlightPhrase);
+
+    // Trigger word first, then the scene description
+    const prompt = `${lora.trigger}, ${basePrompt}`;
 
     return prompt;
   };
@@ -1074,6 +1078,14 @@ export default function MaraV15() {
       return;
     }
 
+    // Log for debugging
+    console.log('🎨 Generating with:', {
+      trigger: lora.trigger,
+      loraUrl: lora.url,
+      scale: lora.scale,
+      prompt: prompt
+    });
+
     try {
       // Submit the request
       const submitResponse = await fetch('https://queue.fal.run/fal-ai/flux-lora', {
@@ -1086,14 +1098,14 @@ export default function MaraV15() {
           prompt: prompt,
           loras: [{
             path: lora.url,
-            scale: lora.scale
+            scale: lora.scale * 1.2  // Boost scale slightly for stronger pattern
           }],
           image_size: 'landscape_16_9',
           num_images: 1,
           enable_safety_checker: false,
           output_format: 'jpeg',
-          num_inference_steps: 28,
-          guidance_scale: 3.5
+          num_inference_steps: 32,  // More steps for better quality
+          guidance_scale: 4.0       // Slightly higher guidance
         })
       });
 
