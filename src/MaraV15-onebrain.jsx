@@ -10,6 +10,11 @@ const CLOUDINARY_BASE = 'https://res.cloudinary.com/dtlodxxio/image/upload';
 // ⚠️ FAL API KEY (from environment variable)
 const FAL_API_KEY = import.meta.env.VITE_FAL_API_KEY;
 
+// ⚠️ AIRTABLE CONFIG (from environment variables)
+const AIRTABLE_API_KEY = import.meta.env.VITE_AIRTABLE_API_KEY;
+const AIRTABLE_BASE_ID = import.meta.env.VITE_AIRTABLE_BASE_ID || 'appo9jJWfID89uSUC';
+const AIRTABLE_TABLE_NAME = 'Products';
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // LORA MODELS FOR AI GENERATE
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -765,13 +770,78 @@ const VIDEOS_CATALOG = [
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// AIRTABLE FETCH FUNCTION
+// Fetches product catalog from Airtable, falls back to hardcoded IMAGE_CATALOG
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const fetchProductsFromAirtable = async () => {
+  if (!AIRTABLE_API_KEY) {
+    console.warn('No Airtable API key configured, using hardcoded catalog');
+    return IMAGE_CATALOG;
+  }
+  
+  try {
+    const response = await fetch(
+      `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}?pageSize=100`,
+      {
+        headers: {
+          'Authorization': `Bearer ${AIRTABLE_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    if (!response.ok) {
+      throw new Error(`Airtable fetch failed: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Transform Airtable records to match IMAGE_CATALOG structure
+    const products = data.records.map(record => {
+      const f = record.fields;
+      return {
+        id: f.id || record.id,
+        pattern: f.pattern || '',
+        patternFamily: f.patternFamily || f.pattern || '',
+        title: f.title || f.pattern || '',
+        sector: f.sector || '',
+        corianColor: f.corianColor || '',
+        mood: [], // Not in Airtable yet
+        isBacklit: f.isBacklit || false,
+        isWaterFeature: false,
+        keywords: f.keywords ? f.keywords.split(',').map(k => k.trim()) : [],
+        image: f.cloudinaryUrl || '',
+        additionalImages: [],
+        specs: {
+          material: f.material || 'DuPont Corian®',
+          color: f.corianColor || '',
+          maxPanel: f.maxPanel || '144" × 60"',
+          leadTime: f.leadTime || '4-6 Weeks',
+          pricePerSF: f.pricePerSF || 50,
+          system: 'InterlockPanel™'
+        },
+        description: f.description || ''
+      };
+    });
+    
+    console.log(`Loaded ${products.length} products from Airtable`);
+    return products.length > 0 ? products : IMAGE_CATALOG;
+    
+  } catch (error) {
+    console.error('Airtable fetch error:', error);
+    return IMAGE_CATALOG;
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // ONE-BRAIN SYSTEM PROMPT
 // Claude decides everything. Full catalogs included.
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const buildSystemPrompt = () => {
+const buildSystemPrompt = (imageCatalog = IMAGE_CATALOG) => {
   // Create simplified catalog for Claude (just essential fields)
-  const imageList = IMAGE_CATALOG.map(img => ({
+  const imageList = imageCatalog.map(img => ({
     id: img.id,
     pattern: img.pattern,
     title: img.title,
@@ -892,7 +962,7 @@ Keep responses conversational. Include tags inline with your text. Never use mar
 // PARSE RESPONSE - Extract tags from Claude's response
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const parseResponse = (text) => {
+const parseResponse = (text, catalog = IMAGE_CATALOG) => {
   const result = {
     cleanText: text,
     images: [],
@@ -904,11 +974,11 @@ const parseResponse = (text) => {
   const imageMatches = text.match(/\[Image:\s*([^\]]+)\]/g) || [];
   imageMatches.forEach(match => {
     const id = match.match(/\[Image:\s*([^\]]+)\]/)[1].trim();
-    const found = IMAGE_CATALOG.find(img => img.id === id);
+    const found = catalog.find(img => img.id === id);
     if (found) {
       result.images.push(found);
     } else {
-      console.warn(`Invalid image ID from Claude: "${id}" - not found in IMAGE_CATALOG`);
+      console.warn(`Invalid image ID from Claude: "${id}" - not found in catalog`);
     }
   });
 
@@ -955,6 +1025,10 @@ export default function MaraV15() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [shownItems, setShownItems] = useState(new Set()); // Track what's been shown
+  
+  // Product catalog state (loaded from Airtable)
+  const [imageCatalog, setImageCatalog] = useState(IMAGE_CATALOG);
+  const [catalogLoading, setCatalogLoading] = useState(true);
 
   // Gallery and Specs state
   const [showGallery, setShowGallery] = useState(false);
@@ -979,7 +1053,7 @@ export default function MaraV15() {
   // Group images by pattern for gallery
   const getGalleryPatterns = () => {
     const patterns = {};
-    IMAGE_CATALOG.forEach(img => {
+    imageCatalog.forEach(img => {
       if (!patterns[img.pattern]) patterns[img.pattern] = [];
       patterns[img.pattern].push(img);
     });
@@ -1007,7 +1081,7 @@ export default function MaraV15() {
     }
 
     // Add other products with same pattern (if any)
-    const related = IMAGE_CATALOG.filter(i => i.pattern === img.pattern && i.id !== img.id).slice(0, 4 - gallery.length);
+    const related = imageCatalog.filter(i => i.pattern === img.pattern && i.id !== img.id).slice(0, 4 - gallery.length);
     gallery = [...gallery, ...related].slice(0, 4);
 
     setPatternGallery(gallery);
@@ -1215,6 +1289,17 @@ export default function MaraV15() {
     inputRef.current?.focus();
   }, []);
 
+  // Fetch product catalog from Airtable on mount
+  useEffect(() => {
+    const loadCatalog = async () => {
+      setCatalogLoading(true);
+      const products = await fetchProductsFromAirtable();
+      setImageCatalog(products);
+      setCatalogLoading(false);
+    };
+    loadCatalog();
+  }, []);
+
   // Build conversation history for Claude
   const buildHistory = () => {
     return messages.map(msg => ({
@@ -1245,7 +1330,7 @@ export default function MaraV15() {
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 500,
-          system: buildSystemPrompt() + shownContext,
+          system: buildSystemPrompt(imageCatalog) + shownContext,
           messages: apiMessages
         })
       });
@@ -1278,7 +1363,7 @@ export default function MaraV15() {
     const response = await callClaude(userMessage);
 
     if (response) {
-      const parsed = parseResponse(response);
+      const parsed = parseResponse(response, imageCatalog);
 
       // Track shown items
       const newShown = new Set(shownItems);
@@ -1496,7 +1581,7 @@ export default function MaraV15() {
             <div className="flex items-center justify-between mb-6 sticky top-0 bg-black/80 backdrop-blur-sm py-4 -mx-4 px-4 z-10">
               <div>
                 <h2 className="text-xl font-semibold text-stone-100">Full Collection</h2>
-                <p className="text-sm text-stone-500">{IMAGE_CATALOG.length} products • Tap to explore</p>
+                <p className="text-sm text-stone-500">{imageCatalog.length} products • Tap to explore</p>
               </div>
               <button
                 onClick={() => setShowGallery(false)}

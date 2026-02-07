@@ -130,11 +130,48 @@ Fins:  https://v3.fal.media/files/b/0a87f1e6/mBUGXAbUMaM1wWFhzhI9g_pytorch_lora_
 ```
 VITE_ANTHROPIC_API_KEY=sk-ant-api03-...
 VITE_FAL_API_KEY=3e417ede-cd4b-4b81-8116-...
+VITE_AIRTABLE_API_KEY=pat...
+VITE_AIRTABLE_BASE_ID=appo9jJWfID89uSUC
 ```
 
 ### Vercel
 Same variables in Project Settings -> Environment Variables
 Remember to Redeploy after changing env vars!
+
+---
+
+## Airtable Integration
+
+### Base Info
+- **Base ID:** appo9jJWfID89uSUC
+- **Table:** Products
+- **URL:** https://airtable.com/appo9jJWfID89uSUC
+
+### How It Works
+1. App fetches product catalog from Airtable on load
+2. Falls back to hardcoded IMAGE_CATALOG if Airtable fails
+3. Products managed in Airtable appear automatically (no code deploy needed)
+
+### Product Fields in Airtable
+| Field | Type | Description |
+|-------|------|-------------|
+| id | Text | Unique product ID (e.g., "lake-backlit") |
+| pattern | Text | Pattern name (e.g., "Lake") |
+| patternFamily | Text | Pattern family for grouping |
+| title | Text | Display title |
+| sector | Text | Market sector (Healthcare, Hospitality, etc.) |
+| corianColor | Text | Corian color name |
+| isBacklit | Checkbox | Whether product is backlit |
+| pricePerSF | Number | Price per square foot |
+| cloudinaryUrl | URL | Image URL from Cloudinary |
+| keywords | Long text | Comma-separated keywords |
+| description | Long text | Product description |
+| material | Text | Material (usually "DuPont Corian®") |
+| maxPanel | Text | Max panel size (e.g., '144" × 60"') |
+| leadTime | Text | Lead time (e.g., "4-6 Weeks") |
+| grooveDirection | Select | Vertical or Horizontal |
+| widthIn | Number | Width in inches |
+| heightIn | Number | Height in inches |
 
 ---
 
