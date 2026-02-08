@@ -781,25 +781,60 @@ const fetchProductsFromAirtable = async () => {
   }
   
   try {
-    const response = await fetch(
-      `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}?pageSize=100`,
-      {
+    const allRecords = [];
+    let offset = undefined;
+    let pageCount = 0;
+    const maxPages = 10; // Safety limit
+    
+    console.log('[Airtable] Starting fetch...');
+    
+    // Pagination loop - Airtable returns max 100 records per page
+    do {
+      const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`);
+      url.searchParams.set('pageSize', '100');
+      if (offset) url.searchParams.set('offset', offset);
+      
+      console.log(`[Airtable] Fetching page ${pageCount + 1}...`);
+      
+      const response = await fetch(url.toString(), {
         headers: {
           'Authorization': `Bearer ${AIRTABLE_API_KEY}`,
           'Content-Type': 'application/json'
         }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Airtable fetch failed: ${response.status}`);
       }
-    );
+      
+      const data = await response.json();
+      allRecords.push(...data.records);
+      offset = data.offset; // Will be undefined when no more pages
+      pageCount++;
+      
+      console.log(`[Airtable] Page ${pageCount}: ${data.records.length} records, total: ${allRecords.length}, hasMore: ${!!offset}`);
+      
+      if (pageCount >= maxPages) {
+        console.warn('[Airtable] Hit max pages limit');
+        break;
+      }
+    } while (offset);
     
-    if (!response.ok) {
-      throw new Error(`Airtable fetch failed: ${response.status}`);
-    }
-    
-    const data = await response.json();
+    console.log(`[Airtable] Total records fetched: ${allRecords.length}`);
     
     // Transform Airtable records to match IMAGE_CATALOG structure
-    const products = data.records.map(record => {
+    const products = allRecords.map(record => {
       const f = record.fields;
+      // Parse keywords - Airtable uses semicolons as separator
+      const keywords = (f.keywords || '')
+        .split(/[;,]/)  // Split on semicolon OR comma for flexibility
+        .map(k => k.trim().toLowerCase())
+        .filter(k => k.length > 0);
+      // Add pattern, sector, color to keywords for better search
+      if (f.pattern) keywords.push(f.pattern.toLowerCase());
+      if (f.sector) keywords.push(f.sector.toLowerCase());
+      if (f.corianColor) keywords.push(f.corianColor.toLowerCase());
+      
       return {
         id: f.id || record.id,
         pattern: f.pattern || '',
@@ -810,7 +845,7 @@ const fetchProductsFromAirtable = async () => {
         mood: [], // Not in Airtable yet
         isBacklit: f.isBacklit || false,
         isWaterFeature: false,
-        keywords: f.keywords ? f.keywords.split(',').map(k => k.trim()) : [],
+        keywords: keywords,
         image: f.cloudinaryUrl || '',
         additionalImages: [],
         specs: {
@@ -825,8 +860,11 @@ const fetchProductsFromAirtable = async () => {
       };
     });
     
-    console.log(`Loaded ${products.length} products from Airtable`);
-    return products.length > 0 ? products : IMAGE_CATALOG;
+    // Filter to only products with valid Cloudinary URLs
+    const validProducts = products.filter(p => p.image && p.image.includes('res.cloudinary.com'));
+    console.log(`[Airtable] Products with valid Cloudinary URLs: ${validProducts.length}`);
+    
+    return validProducts.length > 0 ? validProducts : IMAGE_CATALOG;
     
   } catch (error) {
     console.error('Airtable fetch error:', error);
