@@ -137,3 +137,4 @@ function deriveMood(description, keywords) {
 
 export default fetchProducts;
 // Redeploy trigger Sun Feb  8 11:55:17 PST 2026
+// Force rebuild: Sun Feb  8 12:00:46 PST 2026
