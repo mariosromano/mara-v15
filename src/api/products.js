@@ -76,9 +76,9 @@ export async function fetchProducts() {
 function transformRecord(record) {
   const f = record.fields;
   
-  // Parse keywords into array
+  // Parse keywords into array (Airtable uses semicolons)
   const keywords = (f.keywords || '')
-    .split(',')
+    .split(/[;,]/)  // Split on semicolon OR comma
     .map(k => k.trim().toLowerCase())
     .filter(k => k.length > 0);
   
