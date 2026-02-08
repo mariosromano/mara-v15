@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
+import fetchProducts from './api/products';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MARA V15 - V14 + AI Generate with FAL LoRA models
 // "The only AI that shows you what you can actually build."
+// Now with 221 products from Airtable!
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const CLOUDINARY_BASE = 'https://res.cloudinary.com/dtlodxxio/image/upload';
@@ -607,30 +609,30 @@ const IMAGE_CATALOG = [
 // SMART FAMILY GROUPING
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const getFamilyImages = (selectedImage) => {
+const getFamilyImages = (selectedImage, catalog = IMAGE_CATALOG) => {
   if (!selectedImage) return [];
   
   if (selectedImage.patternFamily) {
-    const colorVariants = IMAGE_CATALOG.filter(
+    const colorVariants = catalog.filter(
       img => img.patternFamily === selectedImage.patternFamily && img.id !== selectedImage.id
     );
     if (colorVariants.length >= 3) return colorVariants.slice(0, 4);
   }
   
-  const patternVariants = IMAGE_CATALOG.filter(
+  const patternVariants = catalog.filter(
     img => img.pattern === selectedImage.pattern && img.id !== selectedImage.id
   );
   if (patternVariants.length >= 3) return patternVariants.slice(0, 4);
   
-  const similar = IMAGE_CATALOG.map(img => {
+  const similar = catalog.map(img => {
     if (img.id === selectedImage.id) return { ...img, score: -1 };
     let score = 0;
     if (selectedImage.isBacklit && img.isBacklit) score += 5;
-    if (selectedImage.specs.enhancement && img.specs.enhancement === selectedImage.specs.enhancement) score += 3;
+    if (selectedImage.specs?.enhancement && img.specs?.enhancement === selectedImage.specs.enhancement) score += 3;
     const sharedMoods = selectedImage.mood?.filter(m => img.mood?.includes(m)) || [];
     score += sharedMoods.length * 2;
     if (img.sector === selectedImage.sector) score += 2;
-    const sharedKeywords = selectedImage.keywords.filter(k => img.keywords.includes(k));
+    const sharedKeywords = (selectedImage.keywords || []).filter(k => (img.keywords || []).includes(k));
     score += Math.min(sharedKeywords.length, 3);
     return { ...img, score };
   })
@@ -639,7 +641,7 @@ const getFamilyImages = (selectedImage) => {
   .slice(0, 4);
   
   if (similar.length < 2) {
-    return IMAGE_CATALOG.filter(img => img.id !== selectedImage.id).slice(0, 4);
+    return catalog.filter(img => img.id !== selectedImage.id).slice(0, 4);
   }
   return similar;
 };
@@ -648,24 +650,24 @@ const getFamilyImages = (selectedImage) => {
 // SEARCH
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const searchImages = (query) => {
+const searchImages = (query, catalog = IMAGE_CATALOG) => {
   if (!query) return [];
   const lower = query.toLowerCase();
   
   if (lower.includes('backlight') || lower.includes('backlit') || lower.includes('glow') || lower.includes('illuminat')) {
-    return IMAGE_CATALOG.filter(img => img.isBacklit === true).slice(0, 2);
+    return catalog.filter(img => img.isBacklit === true).slice(0, 2);
   }
   
   const terms = lower.split(/\s+/).filter(t => t.length > 2);
-  const scored = IMAGE_CATALOG.map(img => {
+  const scored = catalog.map(img => {
     let score = 0;
     terms.forEach(term => {
-      if (img.keywords.some(k => k.includes(term))) score += 15;
-      if (img.pattern.toLowerCase().includes(term)) score += 12;
-      if (img.sector.toLowerCase().includes(term)) score += 10;
-      if (img.title.toLowerCase().includes(term)) score += 8;
-      if (img.mood?.some(m => m.includes(term))) score += 6;
-      if (img.corianColor?.toLowerCase().includes(term)) score += 5;
+      if ((img.keywords || []).some(k => k.includes(term))) score += 15;
+      if ((img.pattern || '').toLowerCase().includes(term)) score += 12;
+      if ((img.sector || '').toLowerCase().includes(term)) score += 10;
+      if ((img.title || '').toLowerCase().includes(term)) score += 8;
+      if ((img.mood || []).some(m => m.includes(term))) score += 6;
+      if ((img.corianColor || '').toLowerCase().includes(term)) score += 5;
     });
     return { ...img, score };
   });
@@ -802,11 +804,11 @@ Use [Image: id] tags to show product images (max 2 per response). Available IDs:
 - Flame: flame-1, flame-bed, flame-pink, flame-lobby
 - Desert Sunset: desert-sunset-1 through desert-sunset-4`;
 
-const extractImageTags = (text) => {
+const extractImageTags = (text, catalog = IMAGE_CATALOG) => {
   const matches = text.match(/\[Image:\s*([^\]]+)\]/g) || [];
   return matches.map(m => {
     const id = m.match(/\[Image:\s*([^\]]+)\]/)[1].trim();
-    return IMAGE_CATALOG.find(img => img.id === id);
+    return catalog.find(img => img.id === id);
   }).filter(Boolean);
 };
 
@@ -874,10 +876,34 @@ export default function MaraV15() {
   const [showAIGenView, setShowAIGenView] = useState(false);
   const [productMaraText, setProductMaraText] = useState('');
   const [productMaraComplete, setProductMaraComplete] = useState(false);
+  
+  // Products from Airtable (replaces hardcoded IMAGE_CATALOG)
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  
+  // Use products from Airtable, fallback to hardcoded IMAGE_CATALOG
+  const catalog = products.length > 0 ? products : IMAGE_CATALOG;
 
   const messagesEndRef = useRef(null);
   const modalInputRef = useRef(null);
   const landingInputRef = useRef(null);
+
+  // Load products from Airtable on mount
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const data = await fetchProducts();
+        console.log(`Loaded ${data.length} products from Airtable`);
+        setProducts(data);
+      } catch (error) {
+        console.error('Failed to load products:', error);
+        // Fallback to empty - could add hardcoded fallback here
+      } finally {
+        setProductsLoading(false);
+      }
+    }
+    loadProducts();
+  }, []);
 
   // Start with empty messages - landing screen handles intro
   useEffect(() => {
@@ -916,7 +942,7 @@ export default function MaraV15() {
 
   const getGalleryPatterns = () => {
     const patterns = {};
-    IMAGE_CATALOG.forEach(img => {
+    catalog.forEach(img => {
       if (!patterns[img.pattern]) patterns[img.pattern] = [];
       patterns[img.pattern].push(img);
     });
@@ -928,7 +954,7 @@ export default function MaraV15() {
     setSpecsImage(img);
     setHeroImage(img); // Set initial hero image
     // Get related images from the same pattern (up to 4)
-    const related = IMAGE_CATALOG.filter(i => i.pattern === img.pattern && i.id !== img.id).slice(0, 4);
+    const related = catalog.filter(i => i.pattern === img.pattern && i.id !== img.id).slice(0, 4);
     setPatternGallery(related);
     setSelectedImage(null);
     setFamilyImages([]);
@@ -937,7 +963,7 @@ export default function MaraV15() {
   const handleFamilyClick = (img) => {
     setSpecsImage(img);
     setHeroImage(img);
-    const related = IMAGE_CATALOG.filter(i => i.pattern === img.pattern && i.id !== img.id).slice(0, 4);
+    const related = catalog.filter(i => i.pattern === img.pattern && i.id !== img.id).slice(0, 4);
     setPatternGallery(related);
   };
 
@@ -1263,7 +1289,7 @@ export default function MaraV15() {
     const isQuestion = lower.includes('what') || lower.includes('who') || lower.includes('how') || lower.includes('why') || lower.includes('tell me') || lower.includes('?');
 
     // Search for matching images
-    const matchedImages = searchImages(userMsg);
+    const matchedImages = searchImages(userMsg, catalog);
 
     // Build history for Claude from landing chat
     const chatHistory = landingChat.map(msg => ({
@@ -1305,7 +1331,7 @@ export default function MaraV15() {
       }]);
     } else {
       // Design query - show image with brief response + follow-up question
-      const images = matchedImages.length > 0 ? matchedImages : [IMAGE_CATALOG.find(i => i.id === 'buddha-1')];
+      const images = matchedImages.length > 0 ? matchedImages : (catalog.length > 0 ? [catalog[0]] : []);
       const img = images[0];
 
       // Build conversational response with follow-up
@@ -1400,7 +1426,7 @@ Want me to show you some backlit patterns?`;
     let responseImages = [];
     
     if (claudeResponse) {
-      responseImages = extractImageTags(claudeResponse);
+      responseImages = extractImageTags(claudeResponse, catalog);
       responseText = cleanResponse(claudeResponse);
       setHistory([...history, 
         { role: 'user', content: userMsg },
@@ -1409,9 +1435,9 @@ Want me to show you some backlit patterns?`;
     }
     
     if (!claudeResponse || responseImages.length === 0) {
-      responseImages = searchImages(userMsg);
+      responseImages = searchImages(userMsg, catalog);
       if (responseImages.length === 0) {
-        responseImages = [IMAGE_CATALOG.find(i => i.id === 'buddha-1')];
+        responseImages = catalog.length > 0 ? [catalog[0]] : [];
       }
     }
 
@@ -2453,7 +2479,7 @@ Want me to show you some backlit patterns?`;
             <div className="flex items-center justify-between mb-6 sticky top-0 bg-black/80 backdrop-blur-sm py-4 -mx-4 px-4 z-10">
               <div>
                 <h2 className="text-xl font-semibold text-stone-100">Full Collection</h2>
-                <p className="text-sm text-stone-500">{IMAGE_CATALOG.length} images • Tap to explore</p>
+                <p className="text-sm text-stone-500">{catalog.length} images • Tap to explore</p>
               </div>
               <button onClick={() => setShowGallery(false)} className="w-10 h-10 bg-stone-800 hover:bg-stone-700 rounded-full flex items-center justify-center text-white">✕</button>
             </div>
