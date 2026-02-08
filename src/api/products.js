@@ -16,39 +16,58 @@ export async function fetchProducts() {
   const allRecords = [];
   let offset = undefined;
   let pageCount = 0;
+  const maxPages = 10; // Safety limit
   
-  do {
-    const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}`);
-    url.searchParams.set('pageSize', '100');
-    if (offset) url.searchParams.set('offset', offset);
-    
-    const response = await fetch(url.toString(), {
-      headers: {
-        'Authorization': `Bearer ${AIRTABLE_TOKEN}`,
-        'Content-Type': 'application/json'
+  console.log('[Airtable] Starting fetch, token exists:', !!AIRTABLE_TOKEN);
+  
+  try {
+    do {
+      const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}`);
+      url.searchParams.set('pageSize', '100');
+      if (offset) url.searchParams.set('offset', offset);
+      
+      console.log(`[Airtable] Fetching page ${pageCount + 1}...`);
+      
+      const response = await fetch(url.toString(), {
+        headers: {
+          'Authorization': `Bearer ${AIRTABLE_TOKEN}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[Airtable] API error ${response.status}:`, errorText);
+        throw new Error(`Airtable API error: ${response.status}`);
       }
-    });
+      
+      const data = await response.json();
+      allRecords.push(...data.records);
+      offset = data.offset; // Will be undefined when no more pages
+      pageCount++;
+      
+      console.log(`[Airtable] Page ${pageCount}: ${data.records.length} records, total so far: ${allRecords.length}, hasMore: ${!!offset}`);
+      
+      // Safety check
+      if (pageCount >= maxPages) {
+        console.warn('[Airtable] Hit max pages limit');
+        break;
+      }
+    } while (offset);
     
-    if (!response.ok) {
-      throw new Error(`Airtable API error: ${response.status}`);
-    }
+    console.log(`[Airtable] Total records fetched: ${allRecords.length}`);
     
-    const data = await response.json();
-    allRecords.push(...data.records);
-    offset = data.offset; // Will be undefined when no more pages
-    pageCount++;
-    console.log(`Fetched page ${pageCount}: ${data.records.length} records, offset: ${offset || 'none'}`);
-  } while (offset);
-  
-  console.log(`Total records fetched: ${allRecords.length}`);
-  
-  // Filter to only products with valid Cloudinary URLs (not expired DASH URLs)
-  const withImages = allRecords
-    .map(transformRecord)
-    .filter(p => p.image && p.image.includes('res.cloudinary.com'));
-  
-  console.log(`Products with valid Cloudinary images: ${withImages.length}`);
-  return withImages;
+    // Filter to only products with valid Cloudinary URLs (not expired DASH URLs)
+    const withImages = allRecords
+      .map(transformRecord)
+      .filter(p => p.image && p.image.includes('res.cloudinary.com'));
+    
+    console.log(`[Airtable] Products with valid Cloudinary images: ${withImages.length}`);
+    return withImages;
+  } catch (error) {
+    console.error('[Airtable] Fetch failed:', error);
+    throw error;
+  }
 }
 
 /**
