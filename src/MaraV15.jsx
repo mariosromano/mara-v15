@@ -2619,6 +2619,48 @@ Want me to show you some backlit patterns?`;
                       </button>
                     ))}
                   </div>
+
+                  {/* Perf Panel Maker Tool */}
+                  <div className="mt-12 pt-8 border-t border-stone-800">
+                    <h3 className="text-center text-lg text-stone-500 mb-6">Design Tools</h3>
+                    <a
+                      href="https://mr-perf-panel-maker.vercel.app/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group block max-w-md mx-auto bg-stone-900/50 border border-stone-700 hover:border-cyan-500/50 rounded-2xl p-6 text-left transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-cyan-500/10"
+                    >
+                      <div className="flex items-center gap-4">
+                        {/* Icon */}
+                        <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-stone-900 rounded-xl flex items-center justify-center">
+                          <svg className="w-8 h-8 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+                            <circle cx="12" cy="8" r="1.5" fill="currentColor" />
+                            <circle cx="16" cy="8" r="1.5" fill="currentColor" />
+                            <circle cx="8" cy="12" r="1.5" fill="currentColor" />
+                            <circle cx="12" cy="12" r="2" fill="currentColor" />
+                            <circle cx="16" cy="12" r="1.5" fill="currentColor" />
+                            <circle cx="8" cy="16" r="1.5" fill="currentColor" />
+                            <circle cx="12" cy="16" r="1.5" fill="currentColor" />
+                            <circle cx="16" cy="16" r="1.5" fill="currentColor" />
+                          </svg>
+                        </div>
+                        {/* Text */}
+                        <div className="flex-1">
+                          <h4 className="text-xl font-semibold text-white mb-1 group-hover:text-cyan-400 transition-colors">
+                            Perf Panel Maker
+                          </h4>
+                          <p className="text-sm text-stone-400">
+                            Convert any image into a perforated panel design for backlit walls
+                          </p>
+                        </div>
+                        {/* Arrow */}
+                        <svg className="w-5 h-5 text-stone-500 group-hover:text-cyan-400 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M7 17L17 7M17 7H7M17 7V17" />
+                        </svg>
+                      </div>
+                    </a>
+                  </div>
                 </div>
               )}
 
