@@ -10,14 +10,16 @@ const AIRTABLE_TOKEN = import.meta.env.VITE_AIRTABLE_TOKEN;
 
 /**
  * Fetch all products from Airtable MakeReal Products table
- * Handles pagination automatically
+ * Handles pagination automatically (Airtable returns max 100 per page)
  */
 export async function fetchProducts() {
   const allRecords = [];
-  let offset = null;
+  let offset = undefined;
+  let pageCount = 0;
   
   do {
     const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}`);
+    url.searchParams.set('pageSize', '100');
     if (offset) url.searchParams.set('offset', offset);
     
     const response = await fetch(url.toString(), {
@@ -33,10 +35,20 @@ export async function fetchProducts() {
     
     const data = await response.json();
     allRecords.push(...data.records);
-    offset = data.offset;
+    offset = data.offset; // Will be undefined when no more pages
+    pageCount++;
+    console.log(`Fetched page ${pageCount}: ${data.records.length} records, offset: ${offset || 'none'}`);
   } while (offset);
   
-  return allRecords.map(transformRecord).filter(p => p.image); // Only products with images
+  console.log(`Total records fetched: ${allRecords.length}`);
+  
+  // Filter to only products with valid Cloudinary URLs (not expired DASH URLs)
+  const withImages = allRecords
+    .map(transformRecord)
+    .filter(p => p.image && p.image.includes('res.cloudinary.com'));
+  
+  console.log(`Products with valid Cloudinary images: ${withImages.length}`);
+  return withImages;
 }
 
 /**
